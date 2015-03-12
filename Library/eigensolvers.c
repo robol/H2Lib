@@ -2008,7 +2008,7 @@ svd_amatrix(pamatrix A, pavector sigma, pamatrix U, pamatrix Vt)
   LAPACK_INT  lwork;
   LAPACK_INT  info = 0;
   LAPACK_INT A_rows = A->rows, A_cols = A->cols, A_ld = A->ld;
-  LAPACK_INT U_ld = U->ld, Vt_ld = Vt->ld;
+  LAPACK_INT U_ld = U ? U->ld : 0, Vt_ld = Vt ? Vt->ld : 0;
 
   if (A->rows > 0 && A->cols > 0) {
     lwork = 10 * UINT_MAX(A->rows, A->cols);
