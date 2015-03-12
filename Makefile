@@ -134,7 +134,7 @@ programs: $(PROGRAMS_tests)
 $(PROGRAMS_tests): %: %.o
 	$(CC) $(LDFLAGS) -Wl,-L,.,-R,. $< -o $@ -lh2 -lm $(LIBS) 
 
-$(PROGRAMS_tests) $(PROGRAMS_tools): libh2.a
+$(PROGRAMS_tests) $(PROGRAMS_tools): libh2.a libh2.so
 
 $(OBJECTS_tests): %.o: %.c
 	@$(GCC) -MT $@ -MM -I Library $< > $(<:%.c=%.d)
@@ -157,6 +157,9 @@ doc:
 libh2.a: $(OBJECTS_libh2)
 	$(AR) $(ARFLAGS) $@ $(OBJECTS_libh2)
 
+libh2.so: $(OBJECTS_libh2)
+	$(GCC) -shared -o libh2.so $(OBJECTS_libh2) $(LDFLAGS) $(LIBS)
+
 $(OBJECTS_libh2): %.o: %.c
 	@$(GCC) -MT $@ -MM $< > $(<:%.c=%.d)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -171,7 +174,7 @@ $(OBJECTS_libh2): Makefile
 .PHONY: clean cleandoc programs indent
 
 clean:
-	$(RM) -f $(OBJECTS) $(DEPENDENCIES) $(PROGRAMS) libh2.a
+	$(RM) -f $(OBJECTS) $(DEPENDENCIES) $(PROGRAMS) libh2.a libh2.so
 
 cleandoc:
 	$(RM) -rf Doc/html Doc/latex
