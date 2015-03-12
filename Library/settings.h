@@ -41,11 +41,14 @@
 #define IMPORT_PREFIX
 #endif
 
+#include "lapack_types.h"
+
 /* ------------------------------------------------------------
  Types
  ------------------------------------------------------------ */
 
 /** @brief Boolean type. */
+#ifndef __MATLAB_TRICK
 typedef unsigned short bool;
 
 /** @brief Boolean constant <tt>true</tt>. */
@@ -53,6 +56,7 @@ extern const bool true;
 
 /** @brief Boolean constant <tt>false</tt>. */
 extern const bool false;
+#endif
 
 /** @brief Unsigned integer type.
  *
@@ -71,6 +75,12 @@ extern const uint u_zero;
 
 /** @brief Unsigned integer constant one. */
 extern const uint u_one;
+
+/** @brief Lapack integer constant zero. */
+extern const LAPACK_INT l_zero;
+
+/** @brief Lapack integer constant one. */
+extern const LAPACK_INT l_one;
 
 /** @brief Unsigned long type.
  *

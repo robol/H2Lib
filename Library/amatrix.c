@@ -11,6 +11,8 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "lapack_types.h"
+
 static uint active_amatrix = 0;
 
 /* ------------------------------------------------------------
@@ -615,15 +617,15 @@ IMPORT_PREFIX double
 
 
 
-ddot_(const unsigned *n,
-      const double *x, const int *incx, const double *y, const int *incy);
+ddot_(const LAPACK_INT *n,
+      const double *x, const LAPACK_INT *incx, const double *y, const LAPACK_INT *incy);
 
 field
 dotprod_amatrix(pcamatrix a, pcamatrix b)
 {
-  field     sum;
-  uint      rows, cols;
-  uint      j;
+  field           sum;
+  LAPACK_INT      rows, cols;
+  uint            j;
 
   rows = a->rows;
   cols = a->cols;
@@ -633,7 +635,7 @@ dotprod_amatrix(pcamatrix a, pcamatrix b)
 
   sum = 0.0;
   for (j = 0; j < cols; j++)
-    sum += ddot_(&rows, a->a + j * a->ld, &i_one, b->a + j * b->ld, &i_one);
+    sum += ddot_(&rows, a->a + j * a->ld, &l_one, b->a + j * b->ld, &l_one);
 
   return sum;
 }
@@ -662,17 +664,18 @@ dotprod_amatrix(pcamatrix a, pcamatrix b)
 
 #ifdef USE_BLAS
 IMPORT_PREFIX double
-          dnrm2_(const unsigned *n, const double *x, const int *incx);
+          dnrm2_(const LAPACK_INT *n, const double *x, const LAPACK_INT *incx);
 
 real
 normfrob_amatrix(pcamatrix a)
 {
   real      sum;
   uint      j;
+  LAPACK_INT a_rows = a->rows;
 
   sum = 0.0;
   for (j = 0; j < a->cols; j++)
-    sum += REAL_SQR(dnrm2_(&a->rows, a->a + j * a->ld, &i_one));
+    sum += REAL_SQR(dnrm2_(&a_rows, a->a + j * a->ld, &l_one));
 
   return REAL_SQRT(sum);
 }
@@ -705,35 +708,43 @@ IMPORT_PREFIX void
 
 
 dgemv_(const char *trans,
-       const unsigned *m,
-       const unsigned *n,
+       const LAPACK_INT *m,
+       const LAPACK_INT *n,
        const double *alpha,
        const double *a,
-       const unsigned *lda,
+       const LAPACK_INT *lda,
        const double *x,
-       const int *incx, const double *beta, double *y, const int *incy);
+       const LAPACK_INT *incx, const double *beta, double *y, const LAPACK_INT *incy);
 
 void
 addeval_amatrix_avector(field alpha, pcamatrix a, pcavector src, pavector trg)
 {
+  LAPACK_INT a_rows = a->rows;
+  LAPACK_INT a_cols = a->cols;
+  LAPACK_INT a_ld   = a->ld;
+
   assert(src->dim >= a->cols);
   assert(trg->dim >= a->rows);
 
   if (a->rows > 0 && a->cols > 0)
-    dgemv_("Not Transposed", &a->rows, &a->cols, &alpha, a->a, &a->ld,
-	   src->v, &i_one, &f_one, trg->v, &i_one);
+    dgemv_("Not Transposed", &a_rows, &a_cols, &alpha, a->a, &a_ld,
+	   src->v, &l_one, &f_one, trg->v, &l_one);
 }
 
 void
 addevaltrans_amatrix_avector(field alpha, pcamatrix a, pcavector src,
 			     pavector trg)
 {
+  LAPACK_INT a_rows = a->rows;
+  LAPACK_INT a_cols = a->cols;
+  LAPACK_INT a_ld   = a->ld;
+
   assert(src->dim >= a->rows);
   assert(trg->dim >= a->cols);
 
   if (a->rows > 0 && a->cols > 0)
-    dgemv_("Transposed", &a->rows, &a->cols, &alpha, a->a, &a->ld,
-	   src->v, &i_one, &f_one, trg->v, &i_one);
+    dgemv_("Transposed", &a_rows, &a_cols, &alpha, a->a, &a_ld,
+	   src->v, &l_one, &f_one, trg->v, &l_one);
 }
 #else
 void
@@ -796,30 +807,32 @@ IMPORT_PREFIX void
 
 
 
-daxpy_(const unsigned *n,
+daxpy_(const LAPACK_INT *n,
        const double *alpha,
        const double *x,
-       const unsigned *incx, double *y, const unsigned *incy);
+       const LAPACK_INT *incx, double *y, const LAPACK_INT *incy);
 
 void
 add_amatrix(field alpha, bool atrans, pcamatrix a, pamatrix b)
 {
   uint      i;
+  LAPACK_INT a_rows = a->rows;
+  LAPACK_INT b_ld   = b->ld;
 
   if (atrans) {
     assert(a->rows <= b->cols);
     assert(a->cols <= b->rows);
 
     for (i = 0; i < a->cols; i++)
-      daxpy_(&a->rows, &alpha, a->a + i * a->ld, &u_one, b->a + i, &b->ld);
+      daxpy_(&a_rows, &alpha, a->a + i * a->ld, &l_one, b->a + i, &b_ld);
   }
   else {
     assert(a->rows <= b->rows);
     assert(a->cols <= b->cols);
 
     for (i = 0; i < a->cols; i++)
-      daxpy_(&a->rows, &alpha, a->a + i * a->ld, &u_one, b->a + i * b->ld,
-	     &u_one);
+      daxpy_(&a_rows, &alpha, a->a + i * a->ld, &l_one, b->a + i * b->ld,
+	     &l_one);
   }
 }
 #else
@@ -863,20 +876,24 @@ IMPORT_PREFIX void
 
 dgemm_(const char *transa,
        const char *transb,
-       const unsigned *m,
-       const unsigned *n,
-       const unsigned *k,
+       const LAPACK_INT *m,
+       const LAPACK_INT *n,
+       const LAPACK_INT *k,
        const double *alpha,
        const double *a,
-       const unsigned *lda,
+       const LAPACK_INT *lda,
        const double *b,
-       const unsigned *ldb,
-       const double *beta, double *c, const unsigned *ldc);
+       const LAPACK_INT *ldb,
+       const double *beta, double *c, const LAPACK_INT *ldc);
 
 void
 addmul_amatrix(field alpha,
 	       bool atrans, pcamatrix a, bool btrans, pcamatrix b, pamatrix c)
 {
+  LAPACK_INT a_cols = a->cols, b_cols = b->cols;
+  LAPACK_INT a_rows = a->rows, b_rows = b->rows;
+  LAPACK_INT a_ld = a->ld, b_ld = b->ld, c_ld = c->ld;
+
   if (atrans) {
     if (btrans) {
       assert(a->cols <= c->rows);
@@ -885,8 +902,8 @@ addmul_amatrix(field alpha,
 
       if (a->cols > 0 && b->rows > 0 && a->rows > 0)
 	dgemm_("Transposed", "Transposed",
-	       &a->cols, &b->rows, &a->rows,
-	       &alpha, a->a, &a->ld, b->a, &b->ld, &f_one, c->a, &c->ld);
+	       &a_cols, &b_rows, &a_rows,
+	       &alpha, a->a, &a_ld, b->a, &b_ld, &f_one, c->a, &c_ld);
     }
     else {
       assert(a->cols <= c->rows);
@@ -895,8 +912,8 @@ addmul_amatrix(field alpha,
 
       if (a->cols > 0 && b->cols > 0 && a->rows > 0)
 	dgemm_("Transposed", "Not Transposed",
-	       &a->cols, &b->cols, &a->rows,
-	       &alpha, a->a, &a->ld, b->a, &b->ld, &f_one, c->a, &c->ld);
+	       &a_cols, &b_cols, &a_rows,
+	       &alpha, a->a, &a_ld, b->a, &b_ld, &f_one, c->a, &c_ld);
     }
   }
   else {
@@ -907,8 +924,8 @@ addmul_amatrix(field alpha,
 
       if (a->rows > 0 && b->rows > 0 && a->cols > 0)
 	dgemm_("Not Transposed", "Transposed",
-	       &a->rows, &b->rows, &a->cols,
-	       &alpha, a->a, &a->ld, b->a, &b->ld, &f_one, c->a, &c->ld);
+	       &a_rows, &b_rows, &a_cols,
+	       &alpha, a->a, &a_ld, b->a, &b_ld, &f_one, c->a, &c_ld);
     }
     else {
       assert(a->rows <= c->rows);
@@ -917,8 +934,8 @@ addmul_amatrix(field alpha,
 
       if (a->rows > 0 && b->cols > 0 && a->cols > 0)
 	dgemm_("Not Transposed", "Not Transposed",
-	       &a->rows, &b->cols, &a->cols,
-	       &alpha, a->a, &a->ld, b->a, &b->ld, &f_one, c->a, &c->ld);
+	       &a_rows, &b_cols, &a_cols,
+	       &alpha, a->a, &a_ld, b->a, &b_ld, &f_one, c->a, &c_ld);
     }
   }
 }
@@ -1024,13 +1041,14 @@ IMPORT_PREFIX void
 
 
 
-dscal_(const unsigned *n, double *da, const double *dx, const unsigned *incx);
+dscal_(const LAPACK_INT *n, double *da, const double *dx, const LAPACK_INT *incx);
 
 void
 diagmul_amatrix(field alpha, bool atrans, pamatrix a, pcavector d)
 {
   double    beta;
-  unsigned  j;
+  LAPACK_INT  j;
+  LAPACK_INT  a_cols = a->cols, a_ld = a->ld, a_rows = a->rows;
 
   if (atrans) {
     assert(a->rows == d->dim);
@@ -1040,7 +1058,7 @@ diagmul_amatrix(field alpha, bool atrans, pamatrix a, pcavector d)
 
     for (j = 0; j < a->rows; j++) {
       beta = CONJ(alpha * d->v[j]);
-      dscal_(&a->cols, &beta, a->a + j, &a->ld);
+      dscal_(&a_cols, &beta, a->a + j, &a_ld);
     }
   }
   else {
@@ -1051,7 +1069,7 @@ diagmul_amatrix(field alpha, bool atrans, pamatrix a, pcavector d)
 
     for (j = 0; j < a->cols; j++) {
       beta = alpha * d->v[j];
-      dscal_(&a->rows, &beta, a->a + j * a->ld, &u_one);
+      dscal_(&a_rows, &beta, a->a + j * a_ld, &l_one);
     }
   }
 }
@@ -1096,14 +1114,15 @@ IMPORT_PREFIX void
 
 
 
-dscal_(const unsigned *n, double *da, const double *dx, const unsigned *incx);
+dscal_(const LAPACK_INT *n, double *da, const double *dx, const LAPACK_INT *incx);
 
 void
 bidiagmul_amatrix(field alpha,
 		  bool atrans, pamatrix a, pcavector d, pcavector l)
 {
   double    beta, gamma;
-  unsigned  j;
+  LAPACK_INT  j;
+  LAPACK_INT  a_cols = a->cols, a_ld = a->ld, a_rows = a->rows;
 
   if (atrans) {
     assert(a->rows == d->dim);
@@ -1114,12 +1133,12 @@ bidiagmul_amatrix(field alpha,
 
     for (j = 0; j + 1 < a->rows; j++) {
       gamma = CONJ(alpha * d->v[j]);
-      dscal_(&a->cols, &gamma, a->a + j, &a->ld);
+      dscal_(&a_cols, &gamma, a->a + j, &a_ld);
       beta = CONJ(alpha * l->v[j]);
-      daxpy_(&a->cols, &beta, a->a + (j + 1), &a->ld, a->a + j, &a->ld);
+      daxpy_(&a_cols, &beta, a->a + (j + 1), &a_ld, a->a + j, &a_ld);
     }
     gamma = CONJ(alpha * d->v[j]);
-    dscal_(&a->cols, &gamma, a->a + j, &a->ld);
+    dscal_(&a_cols, &gamma, a->a + j, &a_ld);
   }
   else {
     assert(a->cols == d->dim);
@@ -1130,13 +1149,13 @@ bidiagmul_amatrix(field alpha,
 
     for (j = 0; j + 1 < a->cols; j++) {
       gamma = alpha * d->v[j];
-      dscal_(&a->rows, &gamma, a->a + j * a->ld, &u_one);
+      dscal_(&a_rows, &gamma, a->a + j * a->ld, &l_one);
       beta = alpha * l->v[j];
-      daxpy_(&a->rows, &beta, a->a + (j + 1) * a->ld, &u_one,
-	     a->a + j * a->ld, &u_one);
+      daxpy_(&a_rows, &beta, a->a + (j + 1) * a->ld, &l_one,
+	     a->a + j * a->ld, &l_one);
     }
     gamma = alpha * d->v[j];
-    dscal_(&a->rows, &gamma, a->a + j * a->ld, &u_one);
+    dscal_(&a_rows, &gamma, a->a + j * a->ld, &l_one);
   }
 }
 #else

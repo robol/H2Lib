@@ -14,6 +14,8 @@
 #include "basic.h"
 #include "factorizations.h"
 
+#include "lapack_types.h"
+
 /** @brief "Machine accuracy" for QR eigenvalue iteration */
 #define H2_QR_EPS 1e-13
 
@@ -438,31 +440,32 @@ sb_muleig_tridiag(ptridiag T, pamatrix Q, uint maxiter)
 #ifdef USE_BLAS
 IMPORT_PREFIX void
 dsteqr_(const char *compz,
-	const unsigned *n,
+	const LAPACK_INT *n,
 	double *d,
-	double *e, double *z, const unsigned *ldz, double *work, int *info);
+	double *e, double *z, const LAPACK_INT *ldz, double *work, LAPACK_INT *info);
 
 IMPORT_PREFIX void
 dstev_(const char *jobz,
-       const unsigned *n,
+       const LAPACK_INT *n,
        double *d,
-       double *e, double *z, const unsigned *ldz, double *work, int *info);
+       double *e, double *z, const LAPACK_INT *ldz, double *work, LAPACK_INT *info);
 
 uint
 muleig_tridiag(ptridiag T, pamatrix Q)
 {
-  double   *work;
-  int       info = 0;
+  double       *work;
+  LAPACK_INT   info = 0;
+  LAPACK_INT   T_dim = T->dim, Q_ld = Q->ld;
 
   if (T->dim > 1) {
     if (Q) {
       work = allocfield(2 * T->dim + 2);
-      dsteqr_("Vectors", &T->dim, T->d, T->l, Q->a, &Q->ld, work, &info);
+      dsteqr_("Vectors", &T_dim, T->d, T->l, Q->a, &Q_ld, work, &info);
       assert(info >= 0);
       freemem(work);
     }
     else {
-      dstev_("No Vectors", &T->dim, T->d, T->l, NULL, &u_one, NULL, &info);
+      dstev_("No Vectors", &T_dim, T->d, T->l, NULL, &l_one, NULL, &info);
       assert(info >= 0);
     }
   }
@@ -614,31 +617,31 @@ sb_tridiagonalize_amatrix(pamatrix A, ptridiag T, pamatrix Q)
 #ifdef USE_BLAS
 IMPORT_PREFIX void
 dlarf_(const char *side,
-       const unsigned *m,
-       const unsigned *n,
+       const LAPACK_INT *m,
+       const LAPACK_INT *n,
        const double *v,
-       const unsigned *incv,
-       const double *tau, double *c, const unsigned *ldc, double *work);
+       const LAPACK_INT *incv,
+       const double *tau, double *c, const LAPACK_INT *ldc, double *work);
 
 void
 tridiagonalize_amatrix(pamatrix A, pavector work, ptridiag T, pamatrix Q)
 {
   pfield    aa;
-  uint      lda;
+  LAPACK_INT      lda;
   pfield    qa;
-  uint      ldq;
+  LAPACK_INT      ldq;
   pfield    d, l, u;
-  uint      n, n1;
-  uint      i, k;
+  LAPACK_INT      n, n1;
+  LAPACK_INT      i, k;
   real      norm2, norm;
   field     first, alpha, beta, gamma;
 
   n = A->rows;
 
-  assert(A->cols == n);
-  assert(Q->rows == n);
-  assert(Q->cols == n);
-  assert(T->dim == n);
+  assert(A->cols == A->rows);
+  assert(Q->rows == A->rows);
+  assert(Q->cols == A->rows);
+  assert(T->dim == A->rows);
 
   aa = A->a;
   lda = A->ld;
@@ -698,20 +701,20 @@ tridiagonalize_amatrix(pamatrix A, pavector work, ptridiag T, pamatrix Q)
       n1 = n - k - 1;
       dlarf_("Left",
 	     &n1, &n1,
-	     aa + (k + 1) + k * lda, &u_one,
+	     aa + (k + 1) + k * lda, &l_one,
 	     &beta, aa + (k + 1) + (k + 1) * lda, &lda, work->v);
 
       /* Update remaining rows */
       dlarf_("Right",
 	     &n1, &n1,
-	     aa + (k + 1) + k * lda, &u_one,
+	     aa + (k + 1) + k * lda, &l_one,
 	     &beta, aa + (k + 1) + (k + 1) * lda, &lda, work->v);
 
       if (Q) {
 	/* Update Q */
 	dlarf_("Right",
 	       &n, &n1,
-	       aa + (k + 1) + k * lda, &u_one,
+	       aa + (k + 1) + k * lda, &l_one,
 	       &beta, qa + (k + 1) * ldq, &ldq, work->v);
       }
       aa[(k + 1) + k * lda] = first;
@@ -777,18 +780,19 @@ sb_eig_amatrix(pamatrix A, pavector lambda, pamatrix Q, uint maxiter)
 IMPORT_PREFIX void
 dsyev_(const char *jobz,
        const char *uplo,
-       const unsigned *n,
+       const LAPACK_INT *n,
        double *a,
-       const unsigned *lda,
-       const double *w, double *work, const unsigned *lwork, int *info);
+       const LAPACK_INT *lda,
+       const double *w, double *work, const LAPACK_INT *lwork, LAPACK_INT *info);
 
 uint
 eig_amatrix(pamatrix A, pavector lambda, pamatrix Q)
 {
-  double   *work;
-  unsigned  lwork;
-  uint      n = A->rows;
-  int       info = 0;
+  double         *work;
+  LAPACK_INT      lwork;
+  LAPACK_INT      n = A->rows;
+  LAPACK_INT      info = 0;
+  LAPACK_INT      A_ld = A->ld;
 
   /* Quick exit if trivial matrix */
   if (n < 2) {
@@ -801,12 +805,12 @@ eig_amatrix(pamatrix A, pavector lambda, pamatrix Q)
   work = allocfield(lwork);
 
   if (Q) {
-    dsyev_("Vectors", "Lower triangle", &n, A->a, &A->ld, lambda->v,
+    dsyev_("Vectors", "Lower triangle", &n, A->a, &A_ld, lambda->v,
 	   work, &lwork, &info);
     copy_amatrix(false, A, Q);
   }
   else
-    dsyev_("No vectors", "Lower triangle", &n, A->a, &A->ld, lambda->v,
+    dsyev_("No vectors", "Lower triangle", &n, A->a, &A_ld, lambda->v,
 	   work, &lwork, &info);
 
   freemem(work);
@@ -1244,24 +1248,27 @@ sb_mulsvd_tridiag(ptridiag T, pamatrix U, pamatrix Vt, uint maxiter)
 #ifdef USE_BLAS
 IMPORT_PREFIX void
 dbdsqr_(const char *uplo,
-	const unsigned *n,
-	const unsigned *ncvt,
-	const unsigned *nru,
-	const unsigned *ncc,
+	const LAPACK_INT *n,
+	const LAPACK_INT *ncvt,
+	const LAPACK_INT *nru,
+	const LAPACK_INT *ncc,
 	double *d,
 	double *e,
 	double *vt,
-	const unsigned *ldvt,
+	const LAPACK_INT *ldvt,
 	double *u,
-	const unsigned *ldu,
-	double *c, const unsigned *ldc, double *work, int *info);
+	const LAPACK_INT *ldu,
+	double *c, const LAPACK_INT *ldc, double *work, LAPACK_INT *info);
 
 uint
 mulsvd_tridiag(ptridiag T, pamatrix U, pamatrix Vt)
 {
-  uint      lwork;
-  double   *work;
-  int       info;
+  LAPACK_INT lwork;
+  double     *work;
+  LAPACK_INT  info;
+
+  LAPACK_INT T_dim = T->dim, U_rows = U->rows, Vt_cols = Vt->cols;
+  LAPACK_INT Vt_ld = Vt->ld, U_ld = U->ld;
 
   if (T->dim < 1)
     return 0;
@@ -1269,13 +1276,13 @@ mulsvd_tridiag(ptridiag T, pamatrix U, pamatrix Vt)
   lwork = 4 * T->dim;
   work = (double *) allocmem((size_t) sizeof(double) * lwork);
   dbdsqr_("Lower bidiagonal",
-	  &T->dim,
-	  (Vt ? &Vt->cols : &u_zero),
-	  (U ? &U->rows : &u_zero),
-	  &u_zero,
+	  &T_dim,
+	  (Vt ? &Vt_cols : &l_zero),
+	  (U ? &U_rows : &l_zero),
+	  &l_zero,
 	  T->d, T->l,
-	  (Vt ? Vt->a : 0), (Vt ? &Vt->ld : &u_one),
-	  (U ? U->a : 0), (U ? &U->ld : &u_one), 0, &u_one, work, &info);
+	  (Vt ? Vt->a : 0), (Vt ? &Vt_ld : &l_one),
+	  (U ? U->a : 0), (U ? &U_ld : &l_one), 0, &l_one, work, &info);
 
   freemem(work);
 
@@ -1603,23 +1610,23 @@ sb_bidiagonalize_amatrix(pamatrix A, ptridiag T, pamatrix U, pamatrix Vt)
 #ifdef USE_BLAS
 IMPORT_PREFIX void
 dlarf_(const char *side,
-       const unsigned *m,
-       const unsigned *n,
+       const LAPACK_INT *m,
+       const LAPACK_INT *n,
        const double *v,
-       const unsigned *incv,
-       const double *tau, double *c, const unsigned *ldc, double *work);
+       const LAPACK_INT *incv,
+       const double *tau, double *c, const LAPACK_INT *ldc, double *work);
 
 void
 bidiagonalize_amatrix(pamatrix A, pavector work,
 		      ptridiag T, pamatrix U, pamatrix Vt)
 {
-  pfield    a, ua, va, d, l, tau;
-  field     alpha, beta, gamma, diag;
-  real      norm, norm2;
-  uint      rows, cols, lda, ldu, ldv;
-  uint      rows1, cols1;
-  uint      dim;
-  uint      i, k;
+  pfield      a, ua, va, d, l, tau;
+  field       alpha, beta, gamma, diag;
+  real        norm, norm2;
+  LAPACK_INT  rows, cols, lda, ldu, ldv;
+  LAPACK_INT  rows1, cols1;
+  LAPACK_INT  dim;
+  LAPACK_INT  i, k;
 
   rows = A->rows;
   cols = A->cols;
@@ -1680,7 +1687,7 @@ bidiagonalize_amatrix(pamatrix A, pavector work,
 	cols1 = cols - k - 1;
 	dlarf_("Left",
 	       &rows1, &cols1,
-	       a + k + k * lda, &u_one,
+	       a + k + k * lda, &l_one,
 	       &beta, a + k + (k + 1) * lda, &lda, work->v);
 
 	/* Set new diagonal entry */
@@ -1701,7 +1708,7 @@ bidiagonalize_amatrix(pamatrix A, pavector work,
 	  cols1 = U->cols;
 	  dlarf_("Left",
 		 &rows1, &cols1,
-		 a + k + k * lda, &u_one, &beta, ua + k, &ldu, work->v);
+		 a + k + k * lda, &l_one, &beta, ua + k, &ldu, work->v);
 
 	  a[k + k * lda] = alpha;
 	}
@@ -1857,7 +1864,7 @@ bidiagonalize_amatrix(pamatrix A, pavector work,
 	cols1 = cols - k - 1;
 	dlarf_("Left",
 	       &rows1, &cols1,
-	       a + (k + 1) + k * lda, &u_one,
+	       a + (k + 1) + k * lda, &l_one,
 	       &beta, a + (k + 1) + (k + 1) * lda, &lda, work->v);
 
 	/* Update rows of U */
@@ -1866,7 +1873,7 @@ bidiagonalize_amatrix(pamatrix A, pavector work,
 	  cols1 = rows - k - 1;
 	  dlarf_("Right",
 		 &rows1, &cols1,
-		 a + (k + 1) + k * lda, &u_one,
+		 a + (k + 1) + k * lda, &l_one,
 		 &beta, ua + (k + 1) * ldu, &ldu, work->v);
 	}
 
@@ -1984,22 +1991,24 @@ sb_svd_amatrix(pamatrix A, pavector sigma, pamatrix U, pamatrix Vt,
 IMPORT_PREFIX void
 dgesvd_(const char *jobu,
 	const char *jobvt,
-	const unsigned *m,
-	const unsigned *n,
+	const LAPACK_INT *m,
+	const LAPACK_INT *n,
 	double *a,
-	const unsigned *lda,
+	const LAPACK_INT *lda,
 	double *s,
 	double *u,
-	const unsigned *ldu,
+	const LAPACK_INT *ldu,
 	double *vt,
-	const unsigned *ldvt, double *work, const unsigned *lwork, int *info);
+	const LAPACK_INT *ldvt, double *work, const LAPACK_INT *lwork, LAPACK_INT *info);
 
 uint
 svd_amatrix(pamatrix A, pavector sigma, pamatrix U, pamatrix Vt)
 {
   double   *work;
-  unsigned  lwork;
-  int       info = 0;
+  LAPACK_INT  lwork;
+  LAPACK_INT  info = 0;
+  LAPACK_INT A_rows = A->rows, A_cols = A->cols, A_ld = A->ld;
+  LAPACK_INT U_ld = U->ld, Vt_ld = Vt->ld;
 
   if (A->rows > 0 && A->cols > 0) {
     lwork = 10 * UINT_MAX(A->rows, A->cols);
@@ -2007,11 +2016,11 @@ svd_amatrix(pamatrix A, pavector sigma, pamatrix U, pamatrix Vt)
 
     dgesvd_((U ? "Skinny left vectors" : "No left vectors"),
 	    (Vt ? "Skinny right vectors" : "No right vectors"),
-	    &A->rows, &A->cols,
-	    A->a, &A->ld,
+	    &A_rows, &A_cols,
+	    A->a, &A_ld,
 	    sigma->v,
-	    (U ? U->a : NULL), (U ? &U->ld : &u_one),
-	    (Vt ? Vt->a : NULL), (Vt ? &Vt->ld : &u_one),
+	    (U ? U->a : NULL), (U ? &U_ld : &l_one),
+	    (Vt ? Vt->a : NULL), (Vt ? &Vt_ld : &l_one),
 	    work, &lwork, &info);
 
     freemem(work);

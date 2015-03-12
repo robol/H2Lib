@@ -280,11 +280,12 @@ IMPORT_PREFIX void
 
 
 
-   dscal_(const unsigned *n, const double *alpha, double *x, const int *incx);
+   dscal_(const LAPACK_INT *n, const double *alpha, double *x, const LAPACK_INT *incx);
 void
 scale_avector(field alpha, pavector v)
 {
-  dscal_(&v->dim, &alpha, v->v, &i_one);
+  const LAPACK_INT v_dim = v->dim;
+  dscal_(&v_dim, &alpha, v->v, &l_one);
 }
 #else
 void
@@ -299,12 +300,13 @@ scale_avector(field alpha, pavector v)
 
 #ifdef USE_BLAS
 IMPORT_PREFIX double
-          dnrm2_(const unsigned *n, const double *x, const int *incx);
+          dnrm2_(const LAPACK_INT *n, const double *x, const LAPACK_INT *incx);
 
 real
 norm2_avector(pcavector v)
 {
-  return dnrm2_(&v->dim, v->v, &i_one);
+  const LAPACK_INT v_dim = v->dim;
+  return dnrm2_(&v_dim, v->v, &l_one);
 }
 #else
 real
@@ -333,15 +335,16 @@ IMPORT_PREFIX double
 
 
 
-ddot_(const unsigned *n,
-      const double *x, const int *incx, const double *y, const int *incy);
+ddot_(const LAPACK_INT *n,
+      const double *x, const LAPACK_INT *incx, const double *y, const LAPACK_INT *incy);
 
 field
 dotprod_avector(pcavector x, pcavector y)
 {
+  const LAPACK_INT x_dim = x->dim;
   assert(x->dim == y->dim);
 
-  return ddot_(&x->dim, x->v, &i_one, y->v, &i_one);
+  return ddot_(&x_dim, x->v, &l_one, y->v, &l_one);
 }
 #else
 field
@@ -372,17 +375,18 @@ IMPORT_PREFIX void
 
 
 
-daxpy_(const unsigned *n,
+daxpy_(const LAPACK_INT *n,
        const double *alpha,
        const double *x,
-       const unsigned *incx, double *y, const unsigned *incy);
+       const LAPACK_INT *incx, double *y, const LAPACK_INT *incy);
 
 void
 add_avector(field alpha, pcavector x, pavector y)
 {
+  const LAPACK_INT x_dim = x->dim;
   assert(x->dim == y->dim);
 
-  daxpy_(&x->dim, &alpha, x->v, &u_one, y->v, &u_one);
+  daxpy_(&x_dim, &alpha, x->v, &l_one, y->v, &l_one);
 }
 #else
 void

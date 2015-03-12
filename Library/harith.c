@@ -657,7 +657,7 @@ add_qq_rkmatrix(field alpha, pcrkmatrix src, pctruncmode tm,
 
   /* Compute QR factorization Q_B R_B = B */
   btau = init_avector(&tmp7, k);
-  qrdecomp_amatrix(b, btau);
+  qrdecomp_amatrix(b, btau);  
   bk = UINT_MIN(k, b->rows);
 
   /* Compute condensed matrix C = R_A R_B^* */
@@ -666,6 +666,7 @@ add_qq_rkmatrix(field alpha, pcrkmatrix src, pctruncmode tm,
   a1 = init_sub_amatrix(&tmp4, a, ak, 0, k, 0);
   b1 = init_sub_amatrix(&tmp5, b, bk, 0, k, 0);
   triangularaddmul_amatrix(1.0, false, false, a1, false, true, b1, c);
+
   uninit_amatrix(b1);
   uninit_amatrix(a1);
 

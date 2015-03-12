@@ -18,3 +18,6 @@ const int i_one = 1;
 
 const uint u_zero = 0;
 const uint u_one = 1;
+
+const LAPACK_INT l_zero = 0;
+const LAPACK_INT l_one = 1;

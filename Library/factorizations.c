@@ -7,6 +7,7 @@
 
 #include "settings.h"
 #include "basic.h"
+#include "lapack_types.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -18,11 +19,11 @@
 void
 diagsolve_amatrix_avector(bool atrans, pcamatrix a, pavector x)
 {
-  pcfield   aa = a->a;
-  uint      lda = a->ld;
-  pfield    xv = x->v;
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      i;
+  pcfield    aa = a->a;
+  LAPACK_INT lda = a->ld;
+  pfield     xv = x->v;
+  LAPACK_INT n = UINT_MIN(a->rows, a->cols);
+  uint       i;
 
   if (atrans) {
     for (i = 0; i < n; i++)
@@ -36,30 +37,31 @@ diagsolve_amatrix_avector(bool atrans, pcamatrix a, pavector x)
 
 #ifdef USE_BLAS
 IMPORT_PREFIX void
-dscal_(const unsigned *n,
-       const double *alpha, double *x, const unsigned *incx);
+dscal_(const LAPACK_INT *n,
+       const double *alpha, double *x, const LAPACK_INT *incx);
 
 void
 diagsolve_amatrix(bool atrans, pcamatrix a, bool xtrans, pamatrix x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      lda = a->ld;
-  uint      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      ldx = x->ld;
   double   *aa = a->a;
   double   *xa = x->a;
   double    alpha;
-  uint      i;
+  LAPACK_INT      i;
+  LAPACK_INT x_rows = x->rows, x_cols = x->cols;
 
   if (xtrans) {
     for (i = 0; i < n; i++) {
       alpha = (atrans ? 1.0 / CONJ(aa[i + i * lda]) : 1.0 / aa[i + i * lda]);
-      dscal_(&x->rows, &alpha, xa + i * ldx, &u_one);
+      dscal_(&x_rows, &alpha, xa + i * ldx, &l_one);
     }
   }
   else {
     for (i = 0; i < n; i++) {
       alpha = (atrans ? 1.0 / CONJ(aa[i + i * lda]) : 1.0 / aa[i + i * lda]);
-      dscal_(&x->cols, &alpha, xa + i, &ldx);
+      dscal_(&x_cols, &alpha, xa + i, &ldx);
     }
   }
 }
@@ -67,13 +69,13 @@ diagsolve_amatrix(bool atrans, pcamatrix a, bool xtrans, pamatrix x)
 void
 diagsolve_amatrix(bool atrans, pcamatrix a, bool xtrans, pamatrix x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      lda = a->ld;
-  uint      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      ldx = x->ld;
   double   *aa = a->a;
   double   *xa = x->a;
   double    alpha;
-  uint      i, j;
+  LAPACK_INT      i, j;
 
   if (xtrans) {
     for (i = 0; i < n; i++) {
@@ -94,30 +96,31 @@ diagsolve_amatrix(bool atrans, pcamatrix a, bool xtrans, pamatrix x)
 
 #ifdef USE_BLAS
 IMPORT_PREFIX void
-dscal_(const unsigned *n,
-       const double *alpha, double *x, const unsigned *incx);
+dscal_(const LAPACK_INT *n,
+       const double *alpha, double *x, const LAPACK_INT *incx);
 
 void
 diageval_amatrix(bool atrans, pcamatrix a, bool xtrans, pamatrix x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      lda = a->ld;
-  uint      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      ldx = x->ld;
   double   *aa = a->a;
   double   *xa = x->a;
   double    alpha;
-  uint      i;
+  int       i;
+  LAPACK_INT x_cols = x->cols, x_rows = x->rows;
 
   if (xtrans) {
     for (i = 0; i < n; i++) {
       alpha = (atrans ? CONJ(aa[i + i * lda]) : aa[i + i * lda]);
-      dscal_(&x->rows, &alpha, xa + i * ldx, &u_one);
+      dscal_(&x_rows, &alpha, xa + i * ldx, &l_one);
     }
   }
   else {
     for (i = 0; i < n; i++) {
       alpha = (atrans ? CONJ(aa[i + i * lda]) : aa[i + i * lda]);
-      dscal_(&x->cols, &alpha, xa + i, &ldx);
+      dscal_(&x_cols, &alpha, xa + i, &ldx);
     }
   }
 }
@@ -125,13 +128,13 @@ diageval_amatrix(bool atrans, pcamatrix a, bool xtrans, pamatrix x)
 void
 diageval_amatrix(bool atrans, pcamatrix a, bool xtrans, pamatrix x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      lda = a->ld;
-  uint      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      ldx = x->ld;
   double   *aa = a->a;
   double   *xa = x->a;
   double    alpha;
-  uint      i, j;
+  LAPACK_INT      i, j;
 
   if (xtrans) {
     for (i = 0; i < n; i++) {
@@ -159,16 +162,16 @@ IMPORT_PREFIX void
 dtrtrs_(const char *uplo,
 	const char *trans,
 	const char *diag,
-	const unsigned *n,
-	const unsigned *nrhs,
+	const LAPACK_INT *n,
+	const LAPACK_INT *nrhs,
 	const double *a,
-	const unsigned *lda, double *b, const unsigned *ldb, int *info);
+	const LAPACK_INT *lda, double *b, const LAPACK_INT *ldb, LAPACK_INT *info);
 
 static void
 lowersolve_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
-  int       info;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      info, a_ld = a->ld, x_dim = x->dim;
 
   assert(x->dim >= a->rows);
   assert(x->dim >= a->cols);
@@ -176,13 +179,13 @@ lowersolve_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
   if (atrans) {
     dtrtrs_("Lower", "Transposed",
 	    (aunit ? "Unit triangular" : "Not unit-triangular"),
-	    &n, &u_one, a->a, &a->ld, x->v, &x->dim, &info);
+	    &n, &l_one, a->a, &a_ld, x->v, &x_dim, &info);
     assert(info == 0);
   }
   else {
     dtrtrs_("Lower", "Not transposed",
 	    (aunit ? "Unit triangular" : "Not unit-triangular"),
-	    &n, &u_one, a->a, &a->ld, x->v, &x->dim, &info);
+	    &n, &l_one, a->a, &a_ld, x->v, &x_dim, &info);
     assert(info == 0);
   }
 }
@@ -190,8 +193,9 @@ lowersolve_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 static void
 uppersolve_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
-  int       info;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      info;
+  LAPACK_INT      a_ld = a->ld, x_dim = x->dim;
 
   assert(x->dim >= a->rows);
   assert(x->dim >= a->cols);
@@ -199,13 +203,13 @@ uppersolve_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
   if (atrans) {
     dtrtrs_("Upper", "Transposed",
 	    (aunit ? "Unit triangular" : "Non-unit triangular"),
-	    &n, &u_one, a->a, &a->ld, x->v, &x->dim, &info);
+	    &n, &l_one, a->a, &a_ld, x->v, &x_dim, &info);
     assert(info == 0);
   }
   else {
     dtrtrs_("Upper", "Not transposed",
 	    (aunit ? "Unit triangular" : "Non-unit triangular"),
-	    &n, &u_one, a->a, &a->ld, x->v, &x->dim, &info);
+	    &n, &l_one, a->a, &a_ld, x->v, &x_dim, &info);
     assert(info == 0);
   }
 }
@@ -214,11 +218,11 @@ static void
 lowersolve_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 {
   pcfield   aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT      lda = a->ld;
   pfield    xv = x->v;
-  uint      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
   field     newval;
-  uint      i, j;
+  LAPACK_INT      i, j;
 
   assert(x->dim >= a->rows);
   assert(x->dim >= a->cols);
@@ -243,11 +247,11 @@ static void
 uppersolve_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 {
   pcfield   aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT      lda = a->ld;
   pfield    xv = x->v;
-  uint      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
   field     newval;
-  uint      i, j;
+  LAPACK_INT      i, j;
 
   assert(x->dim >= a->rows);
   assert(x->dim >= a->cols);
@@ -285,20 +289,21 @@ dtrsm_(const char *side,
        const char *uplo,
        const char *transa,
        const char *diag,
-       const unsigned *m,
-       const unsigned *n,
+       const LAPACK_INT *m,
+       const LAPACK_INT *n,
        const double *alpha,
-       const double *a, const unsigned *lda, double *b, const unsigned *ldb);
+       const double *a, const LAPACK_INT *lda, double *b, const LAPACK_INT *ldb);
 
 static void
 lowersolve_amatrix(bool aunit, bool atrans, pcamatrix a,
 		   bool xtrans, pamatrix x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
-  double   *aa = a->a;
-  uint      lda = a->ld;
-  double   *xa = x->a;
-  uint      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  double          *aa = a->a;
+  LAPACK_INT      lda = a->ld;
+  double          *xa = x->a;
+  LAPACK_INT      ldx = x->ld;
+  LAPACK_INT      x_rows = x->rows, x_cols = x->cols;
 
   if (atrans) {
     if (xtrans) {
@@ -306,14 +311,14 @@ lowersolve_amatrix(bool aunit, bool atrans, pcamatrix a,
 
       dtrsm_("Right", "Lower", "Not transposed",
 	     (aunit ? "Unit diagonal" : "Non-unit diagonal"),
-	     &x->rows, &n, &f_one, aa, &lda, xa, &ldx);
+	     &x_rows, &n, &f_one, aa, &lda, xa, &ldx);
     }
     else {
       assert(x->rows >= n);
 
       dtrsm_("Left", "Lower", "Transposed",
 	     (aunit ? "Unit diagonal" : "Non-unit diagonal"),
-	     &n, &x->cols, &f_one, aa, &lda, xa, &ldx);
+	     &n, &x_cols, &f_one, aa, &lda, xa, &ldx);
     }
   }
   else {
@@ -322,14 +327,14 @@ lowersolve_amatrix(bool aunit, bool atrans, pcamatrix a,
 
       dtrsm_("Right", "Lower", "Transposed",
 	     (aunit ? "Unit diagonal" : "Non-unit diagonal"),
-	     &x->rows, &n, &f_one, aa, &lda, xa, &ldx);
+	     &x_rows, &n, &f_one, aa, &lda, xa, &ldx);
     }
     else {
       assert(x->rows >= n);
 
       dtrsm_("Left", "Lower", "Not transposed",
 	     (aunit ? "Unit diagonal" : "Non-unit diagonal"),
-	     &n, &x->cols, &f_one, aa, &lda, xa, &ldx);
+	     &n, &x_cols, &f_one, aa, &lda, xa, &ldx);
     }
   }
 }
@@ -338,11 +343,12 @@ static void
 uppersolve_amatrix(bool aunit, bool atrans, pcamatrix a,
 		   bool xtrans, pamatrix x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
-  double   *aa = a->a;
-  uint      lda = a->ld;
-  double   *xa = x->a;
-  uint      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  double          *aa = a->a;
+  LAPACK_INT      lda = a->ld;
+  double          *xa = x->a;
+  LAPACK_INT      ldx = x->ld;
+  LAPACK_INT      x_rows = x->rows, x_cols = x->cols;
 
   if (atrans) {
     if (xtrans) {
@@ -350,14 +356,14 @@ uppersolve_amatrix(bool aunit, bool atrans, pcamatrix a,
 
       dtrsm_("Right", "Upper", "Not transposed",
 	     (aunit ? "Unit diagonal" : "Non-unit diagonal"),
-	     &x->rows, &n, &f_one, aa, &lda, xa, &ldx);
+	     &x_rows, &n, &f_one, aa, &lda, xa, &ldx);
     }
     else {
       assert(x->rows >= n);
 
       dtrsm_("Left", "Upper", "Transposed",
 	     (aunit ? "Unit diagonal" : "Non-unit diagonal"),
-	     &n, &x->cols, &f_one, aa, &lda, xa, &ldx);
+	     &n, &x_cols, &f_one, aa, &lda, xa, &ldx);
     }
   }
   else {
@@ -366,14 +372,14 @@ uppersolve_amatrix(bool aunit, bool atrans, pcamatrix a,
 
       dtrsm_("Right", "Upper", "Transposed",
 	     (aunit ? "Unit diagonal" : "Non-unit diagonal"),
-	     &x->rows, &n, &f_one, aa, &lda, xa, &ldx);
+	     &x_rows, &n, &f_one, aa, &lda, xa, &ldx);
     }
     else {
       assert(x->rows >= n);
 
       dtrsm_("Left", "Upper", "Not transposed",
 	     (aunit ? "Unit diagonal" : "Non-unit diagonal"),
-	     &n, &x->cols, &f_one, aa, &lda, xa, &ldx);
+	     &n, &x_cols, &f_one, aa, &lda, xa, &ldx);
     }
   }
 }
@@ -382,12 +388,12 @@ static void
 lowersolve_amatrix(bool aunit, bool atrans, pcamatrix a,
 		   bool xtrans, pamatrix x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      lda = a->ld;
-  uint      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      ldx = x->ld;
   pfield    aa = a->a;
   pfield    xa = x->a;
-  uint      i, j, k;
+  LAPACK_INT      i, j, k;
   field     alpha;
 
   if (atrans) {
@@ -456,12 +462,12 @@ static void
 uppersolve_amatrix(bool aunit, bool atrans, pcamatrix a,
 		   bool xtrans, pamatrix x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      lda = a->ld;
-  uint      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      ldx = x->ld;
   pfield    aa = a->a;
   pfield    xa = x->a;
-  uint      i, j, k;
+  LAPACK_INT      i, j, k;
   field     alpha;
 
   if (atrans) {
@@ -542,28 +548,28 @@ IMPORT_PREFIX void
 dtrmv_(const char *uplo,
        const char *trans,
        const char *diag,
-       const unsigned *n,
-       const double *a, const unsigned *lda, double *x, const unsigned *incx);
+       const LAPACK_INT *n,
+       const double *a, const LAPACK_INT *lda, double *x, const LAPACK_INT *incx);
 
 IMPORT_PREFIX void
 dgemv_(const char *trans,
-       const unsigned *m,
-       const unsigned *n,
+       const LAPACK_INT *m,
+       const LAPACK_INT *n,
        const double *alpha,
        const double *a,
-       const unsigned *lda,
+       const LAPACK_INT *lda,
        const double *x,
-       const unsigned *incx,
-       const double *beta, double *y, const unsigned *incy);
+       const LAPACK_INT *incx,
+       const double *beta, double *y, const LAPACK_INT *incy);
 
 static void
 lowereval_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 {
   double   *aa = a->a;
   double   *xv = x->v;
-  uint      lda = a->ld;
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      n1, i;
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      n1, i;
 
   assert(x->dim >= a->rows);
   assert(x->dim >= a->cols);
@@ -575,13 +581,13 @@ lowereval_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
     /* Left upper part, upper triangular */
     dtrmv_("Lower", "Transposed",
 	   (aunit ? "Unit triangular" : "Non-unit triangular"),
-	   &n, aa, &lda, xv, &u_one);
+	   &n, aa, &lda, xv, &l_one);
 
     /* Right part */
     if (n < a->rows) {
       n1 = a->rows - n;
       dgemv_("Transposed", &n1, &n, &f_one,
-	     aa + n, &lda, xv + n, &u_one, &f_one, xv, &u_one);
+	     aa + n, &lda, xv + n, &l_one, &f_one, xv, &l_one);
     }
 
     /* Lower part */
@@ -597,13 +603,13 @@ lowereval_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 
       n1 = a->rows - n;
       dgemv_("Not Transposed", &n1, &n, &f_one,
-	     aa + n, &lda, xv, &u_one, &f_one, xv + n, &u_one);
+	     aa + n, &lda, xv, &l_one, &f_one, xv + n, &l_one);
     }
 
     /* Top part, lower triangular */
     dtrmv_("Lower", "Not transposed",
 	   (aunit ? "Unit triangular" : "Non-unit triangular"),
-	   &n, aa, &lda, xv, &u_one);
+	   &n, aa, &lda, xv, &l_one);
   }
 }
 
@@ -612,9 +618,9 @@ uppereval_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 {
   double   *aa = a->a;
   double   *xv = x->v;
-  uint      lda = a->ld;
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      n1, i;
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      n1, i;
 
   assert(x->dim >= a->rows);
   assert(x->dim >= a->cols);
@@ -630,25 +636,25 @@ uppereval_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 
       n1 = a->cols - n;
       dgemv_("Transposed", &n, &n1, &f_one,
-	     aa + n * lda, &lda, xv, &u_one, &f_one, xv + n, &u_one);
+	     aa + n * lda, &lda, xv, &l_one, &f_one, xv + n, &l_one);
     }
 
     /* Top part, lower triangular */
     dtrmv_("Upper", "Transposed",
 	   (aunit ? "Unit triangular" : "Non-unit triangular"),
-	   &n, aa, &lda, xv, &u_one);
+	   &n, aa, &lda, xv, &l_one);
   }
   else {
     /* Left upper part, upper triangular */
     dtrmv_("Upper", "Not transposed",
 	   (aunit ? "Unit triangular" : "Non-unit triangular"),
-	   &n, aa, &lda, xv, &u_one);
+	   &n, aa, &lda, xv, &l_one);
 
     /* Right part */
     if (n < a->cols) {
       n1 = a->cols - n;
       dgemv_("Not transposed", &n, &n1, &f_one,
-	     aa + n * lda, &lda, xv + n, &u_one, &f_one, xv, &u_one);
+	     aa + n * lda, &lda, xv + n, &l_one, &f_one, xv, &l_one);
     }
 
     /* Lower part */
@@ -662,11 +668,11 @@ static void
 lowereval_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 {
   pcfield   aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT      lda = a->ld;
   pfield    xv = x->v;
-  uint      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
   field     newval;
-  uint      i, j;
+  LAPACK_INT      i, j;
 
   assert(x->dim >= a->rows);
   assert(x->dim >= a->cols);
@@ -718,11 +724,11 @@ static void
 uppereval_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 {
   pcfield   aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT      lda = a->ld;
   pfield    xv = x->v;
-  uint      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
   field     newval;
-  uint      i, j;
+  LAPACK_INT      i, j;
 
   assert(x->dim >= a->rows);
   assert(x->dim >= a->cols);
@@ -787,34 +793,35 @@ dtrmm_(const char *side,
        const char *uplo,
        const char *trans,
        const char *diag,
-       const unsigned *m,
-       const unsigned *n,
+       const LAPACK_INT *m,
+       const LAPACK_INT *n,
        const double *alpha,
-       const double *a, const unsigned *lda, double *b, const unsigned *ldb);
+       const double *a, const LAPACK_INT *lda, double *b, const LAPACK_INT *ldb);
 
 IMPORT_PREFIX void
 dgemm_(const char *transa,
        const char *transb,
-       const unsigned *m,
-       const unsigned *n,
-       const unsigned *k,
+       const LAPACK_INT *m,
+       const LAPACK_INT *n,
+       const LAPACK_INT *k,
        const double *alpha,
        const double *a,
-       const unsigned *lda,
+       const LAPACK_INT *lda,
        const double *b,
-       const unsigned *ldb,
-       const double *beta, double *c, const unsigned *ldc);
+       const LAPACK_INT *ldb,
+       const double *beta, double *c, const LAPACK_INT *ldc);
 
 static void
 lowereval_amatrix(bool aunit, bool atrans, pcamatrix a,
 		  bool xtrans, pamatrix x)
 {
-  double   *aa = a->a;
-  uint      lda = a->ld;
-  double   *xa = x->a;
-  uint      ldx = x->ld;
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      n1, i, j;
+  double          *aa = a->a;
+  LAPACK_INT      lda = a->ld;
+  double          *xa = x->a;
+  LAPACK_INT      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      n1, i, j;
+  LAPACK_INT      x_rows = x->rows, x_cols = x->cols;
 
   if (n == 0)			/* Quick exit */
     return;
@@ -827,12 +834,12 @@ lowereval_amatrix(bool aunit, bool atrans, pcamatrix a,
       /* Left upper part, upper triangular */
       dtrmm_("Right", "Lower", "Not transposed",
 	     (aunit ? "Unit triangular" : "Non-unit triangular"),
-	     &x->rows, &n, &f_one, aa, &lda, xa, &ldx);
+	     &x_rows, &n, &f_one, aa, &lda, xa, &ldx);
 
       /* Right part */
       if (n < a->rows) {
 	n1 = a->rows - n;
-	dgemm_("Not transposed", "Not transposed", &x->rows, &n, &n1, &f_one,
+	dgemm_("Not transposed", "Not transposed", &x_rows, &n, &n1, &f_one,
 	       xa + n * ldx, &ldx, aa + n, &lda, &f_one, xa, &ldx);
       }
 
@@ -850,14 +857,14 @@ lowereval_amatrix(bool aunit, bool atrans, pcamatrix a,
 	    xa[j + i * ldx] = 0.0;
 
 	n1 = a->rows - n;
-	dgemm_("Not transposed", "Transposed", &x->rows, &n1, &n, &f_one,
+	dgemm_("Not transposed", "Transposed", &x_rows, &n1, &n, &f_one,
 	       xa, &ldx, aa + n, &lda, &f_one, xa + n * ldx, &ldx);
       }
 
       /* Top part, lower triangular */
       dtrmm_("Right", "Lower", "Transposed",
 	     (aunit ? "Unit triangular" : "Non-unit triangular"),
-	     &x->rows, &n, &f_one, aa, &lda, xa, &ldx);
+	     &x_rows, &n, &f_one, aa, &lda, xa, &ldx);
     }
   }
   else {
@@ -868,12 +875,12 @@ lowereval_amatrix(bool aunit, bool atrans, pcamatrix a,
       /* Left upper part, upper triangular */
       dtrmm_("Left", "Lower", "Transposed",
 	     (aunit ? "Unit triangular" : "Non-unit triangular"),
-	     &n, &x->cols, &f_one, aa, &lda, xa, &ldx);
+	     &n, &x_cols, &f_one, aa, &lda, xa, &ldx);
 
       /* Right part */
       if (n < a->rows) {
 	n1 = a->rows - n;
-	dgemm_("Transposed", "Not Transposed", &n, &x->cols, &n1, &f_one,
+	dgemm_("Transposed", "Not Transposed", &n, &x_cols, &n1, &f_one,
 	       aa + n, &lda, xa + n, &ldx, &f_one, xa, &ldx);
       }
 
@@ -891,14 +898,14 @@ lowereval_amatrix(bool aunit, bool atrans, pcamatrix a,
 	    xa[i + j * ldx] = 0.0;
 
 	n1 = a->rows - n;
-	dgemm_("Not Transposed", "Not Transposed", &n1, &x->cols, &n, &f_one,
+	dgemm_("Not Transposed", "Not Transposed", &n1, &x_cols, &n, &f_one,
 	       aa + n, &lda, xa, &ldx, &f_one, xa + n, &ldx);
       }
 
       /* Top part, lower triangular */
       dtrmm_("Left", "Lower", "Not transposed",
 	     (aunit ? "Unit triangular" : "Non-unit triangular"),
-	     &n, &x->cols, &f_one, aa, &lda, xa, &ldx);
+	     &n, &x_cols, &f_one, aa, &lda, xa, &ldx);
     }
   }
 }
@@ -907,12 +914,13 @@ static void
 uppereval_amatrix(bool aunit, bool atrans, pcamatrix a,
 		  bool xtrans, pamatrix x)
 {
-  double   *aa = a->a;
-  uint      lda = a->ld;
-  double   *xa = x->a;
-  uint      ldx = x->ld;
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      n1, i, j;
+  double          *aa = a->a;
+  LAPACK_INT      lda = a->ld;
+  double          *xa = x->a;
+  LAPACK_INT      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      n1, i, j;
+  LAPACK_INT      x_rows = x->rows, x_cols = x->cols;
 
   if (n == 0)			/* Quick exit */
     return;
@@ -929,25 +937,25 @@ uppereval_amatrix(bool aunit, bool atrans, pcamatrix a,
 	    xa[j + i * ldx] = 0.0;
 
 	n1 = a->cols - n;
-	dgemm_("Not Transposed", "Not transposed", &x->rows, &n1, &n, &f_one,
+	dgemm_("Not Transposed", "Not transposed", &x_rows, &n1, &n, &f_one,
 	       xa, &ldx, aa + n * lda, &lda, &f_one, xa + n * ldx, &ldx);
       }
 
       /* Top part, lower triangular */
       dtrmm_("Right", "Upper", "Not transposed",
 	     (aunit ? "Unit triangular" : "Non-unit triangular"),
-	     &x->rows, &n, &f_one, aa, &lda, xa, &ldx);
+	     &x_rows, &n, &f_one, aa, &lda, xa, &ldx);
     }
     else {
       /* Left upper part, upper triangular */
       dtrmm_("Right", "Upper", "Transposed",
 	     (aunit ? "Unit triangular" : "Non-unit triangular"),
-	     &x->rows, &n, &f_one, aa, &lda, xa, &ldx);
+	     &x_rows, &n, &f_one, aa, &lda, xa, &ldx);
 
       /* Right part */
       if (n < a->cols) {
 	n1 = a->cols - n;
-	dgemm_("Not transposed", "Transposed", &x->rows, &n, &n1, &f_one,
+	dgemm_("Not transposed", "Transposed", &x_rows, &n, &n1, &f_one,
 	       xa + n * ldx, &ldx, aa + n * lda, &lda, &f_one, xa, &ldx);
       }
 
@@ -970,25 +978,25 @@ uppereval_amatrix(bool aunit, bool atrans, pcamatrix a,
 	    xa[i + j * ldx] = 0.0;
 
 	n1 = a->cols - n;
-	dgemm_("Transposed", "Not Transposed", &n1, &x->cols, &n, &f_one,
+	dgemm_("Transposed", "Not Transposed", &n1, &x_cols, &n, &f_one,
 	       aa + n * lda, &lda, xa, &ldx, &f_one, xa + n, &ldx);
       }
 
       /* Top part, lower triangular */
       dtrmm_("Left", "Upper", "Transposed",
 	     (aunit ? "Unit triangular" : "Non-unit triangular"),
-	     &n, &x->cols, &f_one, aa, &lda, xa, &ldx);
+	     &n, &x_cols, &f_one, aa, &lda, xa, &ldx);
     }
     else {
       /* Left upper part, upper triangular */
       dtrmm_("Left", "Upper", "Not transposed",
 	     (aunit ? "Unit triangular" : "Non-unit triangular"),
-	     &n, &x->cols, &f_one, aa, &lda, xa, &ldx);
+	     &n, &x_cols, &f_one, aa, &lda, xa, &ldx);
 
       /* Right part */
       if (n < a->cols) {
 	n1 = a->cols - n;
-	dgemm_("Not transposed", "Not Transposed", &n, &x->cols, &n1, &f_one,
+	dgemm_("Not transposed", "Not Transposed", &n, &x_cols, &n1, &f_one,
 	       aa + n * lda, &lda, xa + n, &ldx, &f_one, xa, &ldx);
       }
 
@@ -1006,12 +1014,12 @@ lowereval_amatrix(bool aunit, bool atrans, pcamatrix a, bool xtrans,
 		  pamatrix x)
 {
   pcfield   aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT      lda = a->ld;
   pfield    xa = x->a;
-  uint      ldx = x->ld;
-  uint      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
   field     newval;
-  uint      i, j, k;
+  LAPACK_INT      i, j, k;
 
   if (xtrans) {
     assert(x->cols >= a->rows);
@@ -1126,12 +1134,12 @@ uppereval_amatrix(bool aunit, bool atrans, pcamatrix a, bool xtrans,
 		  pamatrix x)
 {
   pcfield   aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT      lda = a->ld;
   pfield    xa = x->a;
-  uint      ldx = x->ld;
-  uint      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
   field     newval;
-  uint      i, j, k;
+  LAPACK_INT      i, j, k;
 
   if (xtrans) {
     assert(x->cols >= a->rows);
@@ -1254,12 +1262,12 @@ triangulareval_amatrix(bool alower, bool aunit, bool atrans, pcamatrix a,
 
 #ifdef USE_BLAS
 IMPORT_PREFIX void
-dger_(const unsigned *m,
-      const unsigned *n,
+dger_(const LAPACK_INT *m,
+      const LAPACK_INT *n,
       const double *alpha,
       const double *x,
-      const unsigned *incx,
-      const double *y, const unsigned *incy, double *a, const unsigned *lda);
+      const LAPACK_INT *incx,
+      const double *y, const LAPACK_INT *incy, double *a, const LAPACK_INT *lda);
 #endif
 
 void
@@ -1268,15 +1276,15 @@ triangularaddmul_amatrix(field alpha, bool alower, bool atrans,
 			 pamatrix c)
 {
   pcfield   aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT      lda = a->ld;
   pcfield   ba = b->a;
-  uint      ldb = b->ld;
+  LAPACK_INT      ldb = b->ld;
   pfield    ca = c->a;
-  uint      ldc = c->ld;
-  uint      aoff, adim, ainc, boff, bdim, binc;
-  uint      j;
+  LAPACK_INT      ldc = c->ld;
+  LAPACK_INT      aoff, adim, ainc, boff, bdim, binc;
+  LAPACK_INT      j;
 #ifndef USE_BLAS
-  uint      i, k;
+  LAPACK_INT      i, k;
 #endif
 
   if (atrans) {
@@ -1457,12 +1465,12 @@ void
 copy_lower_amatrix(pcamatrix a, bool aunit, pamatrix b)
 {
   pfield    aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT      lda = a->ld;
   pfield    ba = b->a;
-  uint      ldb = b->ld;
-  uint      rows;
-  uint      cols;
-  uint      i, j;
+  LAPACK_INT      ldb = b->ld;
+  LAPACK_INT      rows;
+  LAPACK_INT      cols;
+  LAPACK_INT      i, j;
 
   rows = UINT_MIN(a->rows, b->rows);
   cols = UINT_MIN(a->cols, b->cols);
@@ -1493,12 +1501,12 @@ void
 copy_upper_amatrix(pcamatrix a, bool aunit, pamatrix b)
 {
   pfield    aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT      lda = a->ld;
   pfield    ba = b->a;
-  uint      ldb = b->ld;
-  uint      rows;
-  uint      cols;
-  uint      i, j;
+  LAPACK_INT      ldb = b->ld;
+  LAPACK_INT      rows;
+  LAPACK_INT      cols;
+  LAPACK_INT      i, j;
 
   rows = UINT_MIN(a->rows, b->rows);
   cols = UINT_MIN(a->cols, b->cols);
@@ -1529,25 +1537,25 @@ copy_upper_amatrix(pcamatrix a, bool aunit, pamatrix b)
 
 #ifdef USE_BLAS
 IMPORT_PREFIX void
-dscal_(const unsigned *n,
-       const double *alpha, double *x, const unsigned *incx);
+dscal_(const LAPACK_INT *n,
+       const double *alpha, double *x, const LAPACK_INT *incx);
 
 IMPORT_PREFIX void
-dger_(const unsigned *m,
-      const unsigned *n,
+dger_(const LAPACK_INT *m,
+      const LAPACK_INT *n,
       const double *alpha,
       const double *x,
-      const unsigned *incx,
-      const double *y, const unsigned *incy, double *a, const unsigned *lda);
+      const LAPACK_INT *incx,
+      const double *y, const LAPACK_INT *incy, double *a, const LAPACK_INT *lda);
 
 uint
 lrdecomp_amatrix(pamatrix a)
 {
   double   *aa = a->a;
-  uint      lda = a->ld;
-  uint      n = a->rows;
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      n = a->rows;
   double    alpha;
-  uint      i, n1;
+  LAPACK_INT      i, n1;
 
   assert(n == a->cols);
 
@@ -1558,10 +1566,10 @@ lrdecomp_amatrix(pamatrix a)
     alpha = 1.0 / aa[i + i * lda];
 
     n1 = n - i - 1;
-    dscal_(&n1, &alpha, aa + (i + 1) + i * lda, &u_one);
+    dscal_(&n1, &alpha, aa + (i + 1) + i * lda, &l_one);
     dger_(&n1, &n1,
 	  &f_minusone,
-	  aa + (i + 1) + i * lda, &u_one,
+	  aa + (i + 1) + i * lda, &l_one,
 	  aa + i + (i + 1) * lda, &lda, aa + (i + 1) + (i + 1) * lda, &lda);
   }
 
@@ -1616,16 +1624,16 @@ lrsolve_amatrix_avector(pcamatrix a, pavector x)
 #ifdef USE_BLAS
 IMPORT_PREFIX void
 dpotrf_(const char *uplo,
-	const unsigned *n, double *a, const unsigned *lda, int *info);
+	const LAPACK_INT *n, double *a, const LAPACK_INT *lda, LAPACK_INT *info);
 
 uint
 choldecomp_amatrix(pamatrix a)
 {
   double   *aa = a->a;
-  uint      lda = a->ld;
-  uint      n = a->rows;
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      n = a->rows;
 
-  int       info;
+  LAPACK_INT      info;
 
   assert(n == a->cols);
 
@@ -1638,10 +1646,10 @@ uint
 choldecomp_amatrix(pamatrix a)
 {
   pfield    aa = a->a;
-  uint      lda = a->ld;
-  uint      n = a->rows;
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      n = a->rows;
   real      diag, alpha;
-  uint      i, j, k;
+  LAPACK_INT      i, j, k;
 
   assert(n == a->cols);
 
@@ -1684,23 +1692,23 @@ cholsolve_amatrix_avector(pcamatrix a, pavector x)
 
 #ifdef USE_BLAS
 IMPORT_PREFIX void
-dscal_(const unsigned *n,
-       const double *alpha, double *x, const unsigned *incx);
+dscal_(const LAPACK_INT *n,
+       const double *alpha, double *x, const LAPACK_INT *incx);
 
 IMPORT_PREFIX void
 dsyr_(const char *uplo,
-      const unsigned *n,
+      const LAPACK_INT *n,
       const double *alpha,
-      const double *x, const unsigned *incx, double *a, const unsigned *lda);
+      const double *x, const LAPACK_INT *incx, double *a, const LAPACK_INT *lda);
 
 uint
 ldltdecomp_amatrix(pamatrix a)
 {
   double   *aa = a->a;
-  uint      lda = a->ld;
-  uint      n = a->rows;
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      n = a->rows;
   double    diag, alpha;
-  uint      i, n1;
+  LAPACK_INT      i, n1;
 
   assert(n == a->cols);
 
@@ -1712,12 +1720,12 @@ ldltdecomp_amatrix(pamatrix a)
 
     alpha = 1.0 / diag;
     n1 = n - i - 1;
-    dscal_(&n1, &alpha, aa + (i + 1) + i * lda, &u_one);
+    dscal_(&n1, &alpha, aa + (i + 1) + i * lda, &l_one);
 
     alpha = -diag;
     dsyr_("Lower part", &n1,
 	  &alpha,
-	  aa + (i + 1) + i * lda, &u_one, aa + (i + 1) + (i + 1) * lda, &lda);
+	  aa + (i + 1) + i * lda, &l_one, aa + (i + 1) + (i + 1) * lda, &lda);
   }
 
   diag = REAL(aa[i + i * lda]);
@@ -1775,22 +1783,24 @@ ldltsolve_amatrix_avector(pcamatrix a, pavector x)
 
 #ifdef USE_BLAS
 IMPORT_PREFIX void
-dgeqrf_(const unsigned *m,
-	const unsigned *n,
+dgeqrf_(LAPACK_INT *m,
+	LAPACK_INT *n,
 	double *a,
-	const unsigned *lda,
-	double *tau, double *work, const int *lwork, int *info);
+	LAPACK_INT *lda,
+	double *tau, double *work, LAPACK_INT *lwork, LAPACK_INT *info);
 
 void
 qrdecomp_amatrix(pamatrix a, pavector tau)
 {
-  uint      rows = a->rows;
-  uint      cols = a->cols;
-  uint      refl = UINT_MIN(rows, cols);
-  double   *work;
-  int       lwork, info;
+  LAPACK_INT      rows = a->rows;
+  LAPACK_INT      cols = a->cols;
+  LAPACK_INT      refl = UINT_MIN(rows, cols);
+  LAPACK_INT      a_ld = a->ld;
+  double          *work;
+  LAPACK_INT      lwork, info;
 
   assert(a->ld >= rows);
+
   /* Quick exit if no reflections used */
   if (refl == 0)
     return;
@@ -1801,10 +1811,10 @@ qrdecomp_amatrix(pamatrix a, pavector tau)
   if (tau->dim < refl)
     resize_avector(tau, refl);
 
-  dgeqrf_(&rows, &cols, a->a, &a->ld, tau->v, work, &lwork, &info);
+  dgeqrf_(&rows, &cols, a->a, &a_ld, tau->v, work, &lwork, &info);
   assert(info == 0);
 
-  freemem(work);
+  freemem (work);
 }
 #else
 void
@@ -1877,23 +1887,24 @@ qrdecomp_amatrix(pamatrix a, pavector tau)
 IMPORT_PREFIX void
 dormqr_(const char *side,
 	const char *trans,
-	const unsigned *m,
-	const unsigned *n,
-	const unsigned *k,
+	const LAPACK_INT *m,
+	const LAPACK_INT *n,
+	const LAPACK_INT *k,
 	const double *a,
-	const unsigned *lda,
+	const LAPACK_INT *lda,
 	const double *tau,
 	double *c,
-	const unsigned *ldc, double *work, const int *lwork, int *info);
+	const LAPACK_INT *ldc, double *work, const LAPACK_INT *lwork, LAPACK_INT *info);
 
 void
 qreval_amatrix_avector(bool qtrans, pcamatrix a, pcavector tau, pavector x)
 {
-  uint      rows = a->rows;
-  uint      cols = a->cols;
-  uint      refl;
-  double    work[4];
-  int       lwork, info;
+  LAPACK_INT      rows = a->rows;
+  LAPACK_INT      cols = a->cols;
+  LAPACK_INT      refl;
+  double          * work = NULL; 
+  LAPACK_INT      lwork, info;
+  LAPACK_INT      a_ld = a->ld, x_dim = x->dim;
 
   refl = UINT_MIN(rows, cols);
 
@@ -1903,30 +1914,34 @@ qreval_amatrix_avector(bool qtrans, pcamatrix a, pcavector tau, pavector x)
   assert(tau->dim >= refl);
   assert(x->dim >= rows);
 
-  lwork = 4;
+  lwork = 16 * UINT_MAX(a->rows, a->cols);
+  work = malloc (lwork * sizeof (double));
 
   if (qtrans) {
     dormqr_("Left", "Transposed",
-	    &rows, &u_one, &refl,
-	    a->a, &a->ld, tau->v, x->v, &x->dim, work, &lwork, &info);
+	    &rows, &l_one, &refl,
+	    a->a, &a_ld, tau->v, x->v, &x_dim, work, &lwork, &info);
     assert(info == 0);
   }
   else {
     dormqr_("Left", "Not Transposed",
-	    &rows, &u_one, &refl,
-	    a->a, &a->ld, tau->v, x->v, &x->dim, work, &lwork, &info);
+	    &rows, &l_one, &refl,
+	    a->a, &a_ld, tau->v, x->v, &x_dim, work, &lwork, &info);
     assert(info == 0);
   }
+
+  free (work);
 }
 
 void
 qreval_amatrix(bool qtrans, pcamatrix a, pcavector tau, pamatrix x)
 {
-  uint      rows = a->rows;
-  uint      cols = a->cols;
-  uint      refl;
-  double   *work;
-  int       lwork, info;
+  LAPACK_INT      rows = a->rows;
+  LAPACK_INT      cols = a->cols;
+  LAPACK_INT      refl;
+  double          *work;
+  LAPACK_INT      lwork, info;
+  LAPACK_INT      a_ld = a->ld, x_ld = x->ld, x_cols = x->cols;
 
   refl = UINT_MIN(rows, cols);
 
@@ -1941,14 +1956,14 @@ qreval_amatrix(bool qtrans, pcamatrix a, pcavector tau, pamatrix x)
 
   if (qtrans) {
     dormqr_("Left", "Transposed",
-	    &rows, &x->cols, &refl,
-	    a->a, &a->ld, tau->v, x->a, &x->ld, work, &lwork, &info);
+	    &rows, &x_cols, &refl,
+	    a->a, &a_ld, tau->v, x->a, &x_ld, work, &lwork, &info);
     assert(info == 0);
   }
   else {
     dormqr_("Left", "Not Transposed",
-	    &rows, &x->cols, &refl,
-	    a->a, &a->ld, tau->v, x->a, &x->ld, work, &lwork, &info);
+	    &rows, &x_cols, &refl,
+	    a->a, &a_ld, tau->v, x->a, &x_ld, work, &lwork, &info);
     assert(info == 0);
   }
 
@@ -2107,18 +2122,19 @@ qrinvert_amatrix(pamatrix a)
 
 #ifdef USE_BLAS
 IMPORT_PREFIX void
-dorgqr_(const unsigned *m,
-	const unsigned *n,
-	const unsigned *k,
+dorgqr_(const LAPACK_INT *m,
+	const LAPACK_INT *n,
+	const LAPACK_INT *k,
 	double *a,
-	const unsigned *lda,
-	double *tau, double *work, const unsigned *lwork, unsigned *info);
+	const LAPACK_INT *lda,
+	double *tau, double *work, const LAPACK_INT *lwork, LAPACK_INT *info);
 
 void
 qrexpand_amatrix(pcamatrix a, pcavector tau, pamatrix q)
 {
-  double   *work;
-  uint      refl, lwork, info;
+  double      *work;
+  LAPACK_INT  refl, lwork, info;
+  LAPACK_INT  q_rows = q->rows, q_cols = q->cols, q_ld = q->ld;
 
   refl = UINT_MIN3(q->cols, a->rows, a->cols);
 
@@ -2133,8 +2149,8 @@ qrexpand_amatrix(pcamatrix a, pcavector tau, pamatrix q)
   lwork = 4 * a->rows;
   work = allocfield(lwork);
 
-  dorgqr_(&q->rows, &q->cols, &refl,
-	  q->a, &q->ld, tau->v, work, &lwork, &info);
+  dorgqr_(&q_rows, &q_cols, &refl,
+	  q->a, &q_ld, tau->v, work, &lwork, &info);
   assert(info == 0);
 
   freemem(work);
