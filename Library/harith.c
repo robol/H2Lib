@@ -809,7 +809,13 @@ add_hmatrix(field alpha, pchmatrix a, pctruncmode tm, real eps, phmatrix b)
     rsons = a->rsons;
     csons = a->csons;
 
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
     for (j = 0; j < csons; j++)
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
       for (i = 0; i < rsons; i++)
 	add_hmatrix(alpha, a->son[i + j * rsons], tm, eps,
 		    b->son[i + j * rsons]);
@@ -1946,6 +1952,10 @@ addmul_nn_hmatrix(field alpha, pchmatrix x, pchmatrix y,
 	    assert(csons == 1);
 
 	    roff = 0;
+
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
 	    for (i = 0; i < rsons; i++) {
 	      /* Create submatrix of z */
 	      zf1 = init_sub_amatrix(&tmp2, zf, rc->son[i]->size, roff,
@@ -1954,6 +1964,9 @@ addmul_nn_hmatrix(field alpha, pchmatrix x, pchmatrix y,
 	      z1->f = zf1;
 
 	      /* Multiplications of submatrices */
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
 	      for (j = 0; j < msons; j++)
 		addmul_nn_hmatrix(alpha, x->son[i + j * rsons], y->son[j], tm,
 				  eps, z1);
@@ -1974,6 +1987,9 @@ addmul_nn_hmatrix(field alpha, pchmatrix x, pchmatrix y,
 	    assert(rsons == 1);
 
 	    coff = 0;
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
 	    for (k = 0; k < csons; k++) {
 	      /* Create submatrix of z */
 	      zf1 = init_sub_amatrix(&tmp2, zf, rc->size, 0, cc->son[k]->size,
@@ -1982,6 +1998,9 @@ addmul_nn_hmatrix(field alpha, pchmatrix x, pchmatrix y,
 	      z1->f = zf1;
 
 	      /* Multiplications of submatrices */
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
 	      for (j = 0; j < msons; j++)
 		addmul_nn_hmatrix(alpha, x->son[j], y->son[j + k * msons], tm,
 				  eps, z1);
@@ -1998,6 +2017,9 @@ addmul_nn_hmatrix(field alpha, pchmatrix x, pchmatrix y,
 	  else {
 	    /* Row and column subdivided */
 	    coff = 0;
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
 	    for (k = 0; k < csons; k++) {
 
 	      roff = 0;
@@ -2009,6 +2031,9 @@ addmul_nn_hmatrix(field alpha, pchmatrix x, pchmatrix y,
 		z1->f = zf1;
 
 		/* Multiplications of submatrices */
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
 		for (j = 0; j < msons; j++)
 		  addmul_nn_hmatrix(alpha, x->son[i + j * rsons],
 				    y->son[j + k * msons], tm, eps, z1);
@@ -2032,8 +2057,17 @@ addmul_nn_hmatrix(field alpha, pchmatrix x, pchmatrix y,
 	ztmp = split_hmatrix(z, (x->rc != x->son[0]->rc),
 			     (y->cc != y->son[0]->cc), false);
 
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
 	for (k = 0; k < csons; k++)
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
 	  for (i = 0; i < rsons; i++)
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
 	    for (j = 0; j < msons; j++)
 	      addmul_nn_hmatrix(alpha, x->son[i + j * rsons],
 				y->son[j + k * msons], tm, eps,
@@ -2046,8 +2080,17 @@ addmul_nn_hmatrix(field alpha, pchmatrix x, pchmatrix y,
 	del_hmatrix(ztmp);
       }
       else {
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
 	for (k = 0; k < csons; k++)
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
 	  for (i = 0; i < rsons; i++)
+#ifdef USE_OPENMP
+#pragma omp parallel for
+#endif
 	    for (j = 0; j < msons; j++)
 	      addmul_nn_hmatrix(alpha, x->son[i + j * rsons],
 				y->son[j + k * msons], tm, eps,
