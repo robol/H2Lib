@@ -26,6 +26,7 @@
 #ifdef USE_OPENMP
 #ifdef USE_OPENCL
 #ifdef USE_COMPLEX
+#ifdef MAMAINELLAVITA
 
 static void
 fill_slp_cc_cpu_wrapper_helmholtzbem3d(void *data)
@@ -889,5 +890,5 @@ del_helmholtz_ocl_bem3d(pbem3d bem)
 #endif
 #endif
 #endif
-
+#endif
 #endif

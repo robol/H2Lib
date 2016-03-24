@@ -50,6 +50,7 @@
  * ------------------------------------------------------------ */
 
 /** @brief Boolean type. */
+#ifndef __MATLAB_TRICK
 typedef unsigned short bool;
 
 /** @brief Boolean constant <tt>true</tt>. */
@@ -57,6 +58,7 @@ extern const bool true;
 
 /** @brief Boolean constant <tt>false</tt>. */
 extern const bool false;
+#endif
 
 /** @brief Unsigned integer type.
  *
@@ -285,11 +287,11 @@ extern const char *_h2_novectors;
  */
 typedef enum {
   /** @brief Enum value representing an @ref _amatrix "amatrix". */
-  AMATRIX = 0,//!< AMATRIX
+  AMATRIX = 0,/*!< AMATRIX */
   /** @brief Enum value representing an @ref _hmatrix "hmatrix". */
-  HMATRIX = 1,//!< HMATRIX
+  HMATRIX = 1,/*!< HMATRIX */
   /** @brief Enum value representing an @ref _h2matrix "h2matrix". */
-  H2MATRIX = 2//!< H2MATRIX
+  H2MATRIX = 2/*!< H2MATRIX*/
 } matrixtype;
 
 /** @} */

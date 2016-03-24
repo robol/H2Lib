@@ -7,7 +7,7 @@ RM = rm
 CC = gcc
 GCC = gcc
 
-CFLAGS = -Wall
+CFLAGS = -Wall -fPIC
 LDFLAGS = -Wl,-L,.,-R,.
 LIBS =
 
@@ -39,6 +39,19 @@ ifdef USE_BLAS
   CFLAGS += -DUSE_BLAS
   LIBS += -llapack -lblas -lgfortran
 endif
+
+ifdef USE_MATLAB_BLAS
+  CFLAGS += -DUSE_BLAS 
+  LIBS += -lmwlapack -lmwblas -lgfortran
+
+  # Select the path of your Matlab installation
+  MATLAB_HOME=/home/robol/Software/matlab
+
+  # Select your current Matlab architecture
+  MATLAB_ARCH=glnxa64
+
+  LDFLAGS += -L$(MATLAB_HOME)/bin/$(MATLAB_ARCH) -Wl,-rpath=$(MATLAB_HOME)/bin/$(MATLAB_ARCH)
+endif 
 
 #
 # Cairo graphics

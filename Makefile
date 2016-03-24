@@ -190,7 +190,7 @@ else
 	$(CC) $(LDFLAGS) $< -o $@ -lh2 -lm $(LIBS) 
 endif
 
-$(PROGRAMS_tests) $(PROGRAMS_tools): libh2.a
+$(PROGRAMS_tests) $(PROGRAMS_tools): libh2.a libh2.so
 
 $(OBJECTS_tests): %.o: %.c
 ifdef BRIEF_OUTPUT
@@ -224,6 +224,14 @@ else
 	$(AR) $(ARFLAGS) $@ $(OBJECTS_libh2)
 endif
 
+libh2.so: $(OBJECTS_libh2)
+ifdef BRIEF_OUTPUT
+	@echo Building $@
+	@$(CC) $(LDFLAGS) -o libh2.so -shared $(OBJECTS_libh2)
+else
+	$(CC) $(LDFLAGS) -o libh2.so -shared $(OBJECTS_libh2)
+endif
+
 $(OBJECTS_libh2): %.o: %.c
 ifdef BRIEF_OUTPUT
 	@echo Compiling $<
@@ -244,7 +252,7 @@ $(OBJECTS_libh2): Makefile
 .PHONY: clean cleandoc programs indent
 
 clean:
-	$(RM) -f $(OBJECTS) $(DEPENDENCIES) $(PROGRAMS) libh2.a
+	$(RM) -f $(OBJECTS) $(DEPENDENCIES) $(PROGRAMS) libh2.a libh2.so
 
 cleandoc:
 	$(RM) -rf Doc/html Doc/latex

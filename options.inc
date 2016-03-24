@@ -2,7 +2,7 @@
 # --- Build options configuration
 
 # Brief output during build process
-BRIEF_OUTPUT=1
+#BRIEF_OUTPUT=1
 
 # Build for debugging
 #DEBUG=1
@@ -14,10 +14,12 @@ OPT=1
 #USE_COMPLEX=1
 
 # Use BLAS/LAPACK for linear algebra
-USE_BLAS=1
+USE_BLAS=0
+
+USE_MATLAB_BLAS=1
 
 # Use Cairo for visualization
-USE_CAIRO=1
+#USE_CAIRO=1
 
 # Use OpenMP for parallelization
 #USE_OPENMP=1
