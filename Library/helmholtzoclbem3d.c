@@ -21,7 +21,7 @@
 /* PARTICLES */
 /* BEM */
 #include "oclbem3d.h"
-#include "helmholtzbem3d.c"
+#include "helmholtzbem3d.h"
 
 #ifdef USE_OPENMP
 #ifdef USE_OPENCL
