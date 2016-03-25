@@ -134,7 +134,7 @@ findrank_truncmode(pctruncmode tm, real eps, pcrealavector sigma)
     else {
       k = 0;
       while (k < sigma->dim && sigma->v[k] > eps * sigma->v[0])
-	k++;
+	    k++;
     }
   }
 
