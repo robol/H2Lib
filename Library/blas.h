@@ -56,16 +56,16 @@
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX float _Complex
-cdotc_(const unsigned *n, const float _Complex * x, const unsigned *incx,
-    const float _Complex * y, const unsigned *incy);
+cdotc_(const LAPACK_INT *n, const float _Complex * x, const LAPACK_INT *incx,
+    const float _Complex * y, const LAPACK_INT *incy);
 /** @endcond */
 #define h2_dot(n, x, incx, y, incy) cdotc_(n, x, incx, y, incy)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX float
-sdot_(const unsigned *n,
-    const float *x, const unsigned *incx, const float *y,
-    const unsigned *incy);
+sdot_(const LAPACK_INT *n,
+    const float *x, const LAPACK_INT *incx, const float *y,
+    const LAPACK_INT *incy);
 /** @endcond */
 #define h2_dot(n, x, incx, y, incy) sdot_(n, x, incx, y, incy)
 #endif
@@ -73,15 +73,15 @@ sdot_(const unsigned *n,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX double _Complex
-zdotc_(const unsigned *n, const double _Complex * x, const unsigned *incx,
-    const double _Complex * y, const unsigned *incy);
+zdotc_(const LAPACK_INT *n, const double _Complex * x, const LAPACK_INT *incx,
+    const double _Complex * y, const LAPACK_INT *incy);
 /** @endcond */
 #define h2_dot(n, x, incx, y, incy) zdotc_(n, x, incx, y, incy)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX double
-ddot_(const unsigned *n, const double *x, const unsigned *incx, const double *y,
-    const unsigned *incy);
+ddot_(const LAPACK_INT *n, const double *x, const LAPACK_INT *incx, const double *y,
+    const LAPACK_INT *incy);
 /** @endcond */
 #define h2_dot(n, x, incx, y, incy) ddot_(n, x, incx, y, incy)
 #endif
@@ -103,8 +103,8 @@ ddot_(const unsigned *n, const double *x, const unsigned *incx, const double *y,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX float
-sdot_(const unsigned *n, const float *x, const unsigned *incx, const float *y,
-    const unsigned *incy);
+sdot_(const LAPACK_INT *n, const float *x, const LAPACK_INT *incx, const float *y,
+    const LAPACK_INT *incy);
 /** @endcond */
 #define h2_rdot(n, x, incx, y, incy) sdot_(n, x, incx, y, incy)
 #else
@@ -114,8 +114,8 @@ sdot_(const unsigned *n, const float *x, const unsigned *incx, const float *y,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX double
-ddot_(const unsigned *n, const double *x, const unsigned *incx, const double *y,
-    const unsigned *incy);
+ddot_(const LAPACK_INT *n, const double *x, const LAPACK_INT *incx, const double *y,
+    const LAPACK_INT *incy);
 /** @endcond */
 #define h2_rdot(n, x, incx, y, incy) ddot_(n, x, incx, y, incy)
 #else
@@ -142,16 +142,16 @@ ddot_(const unsigned *n, const double *x, const unsigned *incx, const double *y,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-caxpy_(const unsigned *n, const float _Complex * alpha,
-    const float _Complex * x, const unsigned *incx, float _Complex * y,
-    const unsigned *incy);
+caxpy_(const LAPACK_INT *n, const float _Complex * alpha,
+    const float _Complex * x, const LAPACK_INT *incx, float _Complex * y,
+    const LAPACK_INT *incy);
 /** @endcond */
 #define h2_axpy(n, alpha, x, incx, y, incy) caxpy_(n, alpha, x, incx, y, incy)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-saxpy_(const unsigned *n, const float * alpha,
-    const float * x, const unsigned *incx, float * y, const unsigned *incy);
+saxpy_(const LAPACK_INT *n, const float * alpha,
+    const float * x, const LAPACK_INT *incx, float * y, const LAPACK_INT *incy);
 /** @endcond */
 #define h2_axpy(n, alpha, x, incx, y, incy) saxpy_(n, alpha, x, incx, y, incy)
 #endif
@@ -159,16 +159,16 @@ saxpy_(const unsigned *n, const float * alpha,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zaxpy_(const unsigned *n, const double _Complex *alpha,
-    const double _Complex *x, const unsigned *incx, double _Complex *y,
-    const unsigned *incy);
+zaxpy_(const LAPACK_INT *n, const double _Complex *alpha,
+    const double _Complex *x, const LAPACK_INT *incx, double _Complex *y,
+    const LAPACK_INT *incy);
 /** @endcond */
 #define h2_axpy(n, alpha, x, incx, y, incy) zaxpy_(n, alpha, x, incx, y, incy)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-daxpy_(const unsigned *n, const double *alpha, const double *x,
-    const unsigned *incx, double *y, const unsigned *incy);
+daxpy_(const LAPACK_INT *n, const double *alpha, const double *x,
+    const LAPACK_INT *incx, double *y, const LAPACK_INT *incy);
 /** @endcond */
 #define h2_axpy(n, alpha, x, incx, y, incy) daxpy_(n, alpha, x, incx, y, incy)
 #endif
@@ -189,8 +189,8 @@ daxpy_(const unsigned *n, const double *alpha, const double *x,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-saxpy_(const unsigned *n, const float * alpha, const float * x,
-    const unsigned *incx, float * y, const unsigned *incy);
+saxpy_(const LAPACK_INT *n, const float * alpha, const float * x,
+    const LAPACK_INT *incx, float * y, const LAPACK_INT *incy);
 /** @endcond */
 #define h2_raxpy(n, alpha, x, incx, y, incy) saxpy_(n, alpha, x, incx, y, incy)
 #else
@@ -200,8 +200,8 @@ saxpy_(const unsigned *n, const float * alpha, const float * x,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-daxpy_(const unsigned *n, const double *alpha, const double *x,
-    const unsigned *incx, double *y, const unsigned *incy);
+daxpy_(const LAPACK_INT *n, const double *alpha, const double *x,
+    const LAPACK_INT *incx, double *y, const LAPACK_INT *incy);
 /** @endcond */
 #define h2_raxpy(n, alpha, x, incx, y, incy) daxpy_(n, alpha, x, incx, y, incy)
 #else
@@ -225,14 +225,14 @@ daxpy_(const unsigned *n, const double *alpha, const double *x,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cscal_(const unsigned *n, const float _Complex *alpha, float _Complex *x,
-    const unsigned *incx);
+cscal_(const LAPACK_INT *n, const float _Complex *alpha, float _Complex *x,
+    const LAPACK_INT *incx);
 /** @endcond */
 #define h2_scal(n, alpha, x, incx) cscal_(n, alpha, x, incx)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-sscal_(const unsigned *n, const float *alpha, float *x, const unsigned *incx);
+sscal_(const LAPACK_INT *n, const float *alpha, float *x, const LAPACK_INT *incx);
 /** @endcond */
 #define h2_scal(n, alpha, x, incx) sscal_(n, alpha, x, incx)
 #endif
@@ -240,14 +240,14 @@ sscal_(const unsigned *n, const float *alpha, float *x, const unsigned *incx);
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zscal_(const unsigned *n, const double _Complex *alpha, double _Complex *x,
-    const unsigned *incx);
+zscal_(const LAPACK_INT *n, const double _Complex *alpha, double _Complex *x,
+    const LAPACK_INT *incx);
 /** @endcond */
 #define h2_scal(n, alpha, x, incx) zscal_(n, alpha, x, incx)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dscal_(const unsigned *n, const double *alpha, double *x, const unsigned *incx);
+dscal_(const LAPACK_INT *n, const double *alpha, double *x, const LAPACK_INT *incx);
 /** @endcond */
 #define h2_scal(n, alpha, x, incx) dscal_(n, alpha, x, incx)
 #endif
@@ -265,8 +265,8 @@ dscal_(const unsigned *n, const double *alpha, double *x, const unsigned *incx);
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-csscal_(const unsigned *n, const float *alpha, float _Complex *x,
-    const unsigned *incx);
+csscal_(const LAPACK_INT *n, const float *alpha, float _Complex *x,
+    const LAPACK_INT *incx);
 /** @endcond */
 #define h2_rscal(n, alpha, x, incx) csscal_(n, alpha, x, incx)
 #else
@@ -276,8 +276,8 @@ csscal_(const unsigned *n, const float *alpha, float _Complex *x,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zdscal_(const unsigned *n, const double *alpha, double _Complex *x,
-    const unsigned *incx);
+zdscal_(const LAPACK_INT *n, const double *alpha, double _Complex *x,
+    const LAPACK_INT *incx);
 /** @endcond */
 #define h2_rscal(n, alpha, x, incx) zdscal_(n, alpha, x, incx)
 #else
@@ -301,13 +301,13 @@ zdscal_(const unsigned *n, const double *alpha, double _Complex *x,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX float
-scnrm2_(const unsigned *n, const float _Complex *x, const unsigned *incx);
+scnrm2_(const LAPACK_INT *n, const float _Complex *x, const LAPACK_INT *incx);
 /** @endcond */
 #define h2_nrm2(n, x, incx) scnrm2_(n, x, incx)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX float
-snrm2_(const unsigned *n, const float *x, const unsigned *incx);
+snrm2_(const LAPACK_INT *n, const float *x, const LAPACK_INT *incx);
 /** @endcond */
 #define h2_nrm2(n, x, incx) snrm2_(n, x, incx)
 #endif
@@ -315,13 +315,13 @@ snrm2_(const unsigned *n, const float *x, const unsigned *incx);
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX double
-dznrm2_(const unsigned *n, const double _Complex *x, const unsigned *incx);
+dznrm2_(const LAPACK_INT *n, const double _Complex *x, const LAPACK_INT *incx);
 /** @endcond */
 #define h2_nrm2(n, x, incx) dznrm2_(n, x, incx)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX double
-dnrm2_(const unsigned *n, const double *x, const unsigned *incx);
+dnrm2_(const LAPACK_INT *n, const double *x, const LAPACK_INT *incx);
 /** @endcond */
 #define h2_nrm2(n, x, incx) dnrm2_(n, x, incx)
 #endif
@@ -344,15 +344,15 @@ dnrm2_(const unsigned *n, const double *x, const unsigned *incx);
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cswap_(const unsigned *n, float _Complex *x, const unsigned *incx,
-    float _Complex *y, const unsigned *incy);
+cswap_(const LAPACK_INT *n, float _Complex *x, const LAPACK_INT *incx,
+    float _Complex *y, const LAPACK_INT *incy);
 /** @endcond */
 #define h2_swap(n, x, incx, y, incy) cswap_(n, x, incx, y, incy)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-sswap_(const unsigned *n, float *x, const unsigned *incx, float *y,
-    const unsigned *incy);
+sswap_(const LAPACK_INT *n, float *x, const LAPACK_INT *incx, float *y,
+    const LAPACK_INT *incy);
 /** @endcond */
 #define h2_swap(n, x, incx, y, incy) sswap_(n, x, incx, y, incy)
 #endif
@@ -360,15 +360,15 @@ sswap_(const unsigned *n, float *x, const unsigned *incx, float *y,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zswap_(const unsigned *n, double _Complex *x, const unsigned *incx,
-    double _Complex *y, const unsigned *incy);
+zswap_(const LAPACK_INT *n, double _Complex *x, const LAPACK_INT *incx,
+    double _Complex *y, const LAPACK_INT *incy);
 /** @endcond */
 #define h2_swap(n, x, incx, y, incy) zswap_(n, x, incx, y, incy)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dswap_(const unsigned *n, double *x, const unsigned *incx, double *y,
-    const unsigned *incy);
+dswap_(const LAPACK_INT *n, double *x, const LAPACK_INT *incx, double *y,
+    const LAPACK_INT *incy);
 /** @endcond */
 #define h2_swap(n, x, incx, y, incy) dswap_(n, x, incx, y, incy)
 #endif
@@ -412,18 +412,18 @@ dswap_(const unsigned *n, double *x, const unsigned *incx, double *y,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cgemv_(const char *trans, const unsigned *m, const unsigned *n,
-    const float _Complex *alpha, const float _Complex *a, const unsigned *lda,
-    const float _Complex *x, const unsigned *incx, const float _Complex *beta,
-    float _Complex *y, const unsigned *incy);
+cgemv_(const char *trans, const LAPACK_INT *m, const LAPACK_INT *n,
+    const float _Complex *alpha, const float _Complex *a, const LAPACK_INT *lda,
+    const float _Complex *x, const LAPACK_INT *incx, const float _Complex *beta,
+    float _Complex *y, const LAPACK_INT *incy);
 /** @endcond */
 #define h2_gemv(trans, m, n, alpha, a, lda, x, incx, beta, y, incy) cgemv_(trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-sgemv_(const char *trans, const unsigned *m, const unsigned *n,
-    const float *alpha, const float *a, const unsigned *lda, const float *x,
-    const unsigned *incx, const float *beta, float *y, const unsigned *incy);
+sgemv_(const char *trans, const LAPACK_INT *m, const LAPACK_INT *n,
+    const float *alpha, const float *a, const LAPACK_INT *lda, const float *x,
+    const LAPACK_INT *incx, const float *beta, float *y, const LAPACK_INT *incy);
 /** @endcond */
 #define h2_gemv(trans, m, n, alpha, a, lda, x, incx, beta, y, incy) sgemv_(trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
 #endif
@@ -431,18 +431,18 @@ sgemv_(const char *trans, const unsigned *m, const unsigned *n,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zgemv_(const char *trans, const unsigned *m, const unsigned *n,
-    const double _Complex *alpha, const double _Complex *a, const unsigned *lda,
-    const double _Complex *x, const unsigned *incx, const double _Complex *beta,
-    double _Complex *y, const unsigned *incy);
+zgemv_(const char *trans, const LAPACK_INT *m, const LAPACK_INT *n,
+    const double _Complex *alpha, const double _Complex *a, const LAPACK_INT *lda,
+    const double _Complex *x, const LAPACK_INT *incx, const double _Complex *beta,
+    double _Complex *y, const LAPACK_INT *incy);
 /** @endcond */
 #define h2_gemv(trans, m, n, alpha, a, lda, x, incx, beta, y, incy) zgemv_(trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dgemv_(const char *trans, const unsigned *m, const unsigned *n,
-    const double *alpha, const double *a, const unsigned *lda, const double *x,
-    const unsigned *incx, const double *beta, double *y, const unsigned *incy);
+dgemv_(const char *trans, const LAPACK_INT *m, const LAPACK_INT *n,
+    const double *alpha, const double *a, const LAPACK_INT *lda, const double *x,
+    const LAPACK_INT *incx, const double *beta, double *y, const LAPACK_INT *incy);
 /** @endcond */
 #define h2_gemv(trans, m, n, alpha, a, lda, x, incx, beta, y, incy) dgemv_(trans, m, n, alpha, a, lda, x, incx, beta, y, incy)
 #endif
@@ -480,16 +480,16 @@ dgemv_(const char *trans, const unsigned *m, const unsigned *n,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-ctrmv_(const char *uplo, const char *trans, const char *diag, const unsigned *n,
-    const float _Complex *a, const unsigned *lda, float _Complex *x,
-    const unsigned *incx);
+ctrmv_(const char *uplo, const char *trans, const char *diag, const LAPACK_INT *n,
+    const float _Complex *a, const LAPACK_INT *lda, float _Complex *x,
+    const LAPACK_INT *incx);
 /** @endcond */
 #define h2_trmv(uplo, trans, diag, n, a, lda, x, incx) ctrmv_(uplo, trans, diag, n, a, lda, x, incx)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-strmv_(const char *uplo, const char *trans, const char *diag, const unsigned *n,
-    const float *a, const unsigned *lda, float *x, const unsigned *incx);
+strmv_(const char *uplo, const char *trans, const char *diag, const LAPACK_INT *n,
+    const float *a, const LAPACK_INT *lda, float *x, const LAPACK_INT *incx);
 /** @endcond */
 #define h2_trmv(uplo, trans, diag, n, a, lda, x, incx) strmv_(uplo, trans, diag, n, a, lda, x, incx)
 #endif
@@ -497,16 +497,16 @@ strmv_(const char *uplo, const char *trans, const char *diag, const unsigned *n,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-ztrmv_(const char *uplo, const char *trans, const char *diag, const unsigned *n,
-    const double _Complex *a, const unsigned *lda, double _Complex *x,
-    const unsigned *incx);
+ztrmv_(const char *uplo, const char *trans, const char *diag, const LAPACK_INT *n,
+    const double _Complex *a, const LAPACK_INT *lda, double _Complex *x,
+    const LAPACK_INT *incx);
 /** @endcond */
 #define h2_trmv(uplo, trans, diag, n, a, lda, x, incx) ztrmv_(uplo, trans, diag, n, a, lda, x, incx)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dtrmv_(const char *uplo, const char *trans, const char *diag, const unsigned *n,
-    const double *a, const unsigned *lda, double *x, const unsigned *incx);
+dtrmv_(const char *uplo, const char *trans, const char *diag, const LAPACK_INT *n,
+    const double *a, const LAPACK_INT *lda, double *x, const LAPACK_INT *incx);
 /** @endcond */
 #define h2_trmv(uplo, trans, diag, n, a, lda, x, incx) dtrmv_(uplo, trans, diag, n, a, lda, x, incx)
 #endif
@@ -535,17 +535,17 @@ dtrmv_(const char *uplo, const char *trans, const char *diag, const unsigned *n,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cgerc_(const unsigned *m, const unsigned *n, const float _Complex *alpha,
-    const float _Complex *x, const unsigned *incx, const float _Complex *y,
-    const unsigned *incy, float _Complex *a, const unsigned *lda);
+cgerc_(const LAPACK_INT *m, const LAPACK_INT *n, const float _Complex *alpha,
+    const float _Complex *x, const LAPACK_INT *incx, const float _Complex *y,
+    const LAPACK_INT *incy, float _Complex *a, const LAPACK_INT *lda);
 /** @endcond */
 #define h2_ger(m, n, alpha, x, incx, y, incy, a, lda) cgerc_(m, n, alpha, x, incx, y, incy, a, lda)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-sger_(const unsigned *m, const unsigned *n, const float *alpha,
-    const float *x, const unsigned *incx, const float *y,
-    const unsigned *incy, float *a, const unsigned *lda);
+sger_(const LAPACK_INT *m, const LAPACK_INT *n, const float *alpha,
+    const float *x, const LAPACK_INT *incx, const float *y,
+    const LAPACK_INT *incy, float *a, const LAPACK_INT *lda);
 /** @endcond */
 #define h2_ger(m, n, alpha, x, incx, y, incy, a, lda) sger_(m, n, alpha, x, incx, y, incy, a, lda)
 #endif
@@ -553,17 +553,17 @@ sger_(const unsigned *m, const unsigned *n, const float *alpha,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zgerc_(const unsigned *m, const unsigned *n, const double _Complex *alpha,
-    const double _Complex *x, const unsigned *incx, const double _Complex *y,
-    const unsigned *incy, double _Complex *a, const unsigned *lda);
+zgerc_(const LAPACK_INT *m, const LAPACK_INT *n, const double _Complex *alpha,
+    const double _Complex *x, const LAPACK_INT *incx, const double _Complex *y,
+    const LAPACK_INT *incy, double _Complex *a, const LAPACK_INT *lda);
 /** @endcond */
 #define h2_ger(m, n, alpha, x, incx, y, incy, a, lda) zgerc_(m, n, alpha, x, incx, y, incy, a, lda)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dger_(const unsigned *m, const unsigned *n, const double *alpha,
-    const double *x, const unsigned *incx, const double *y,
-    const unsigned *incy, double *a, const unsigned *lda);
+dger_(const LAPACK_INT *m, const LAPACK_INT *n, const double *alpha,
+    const double *x, const LAPACK_INT *incx, const double *y,
+    const LAPACK_INT *incy, double *a, const LAPACK_INT *lda);
 /** @endcond */
 #define h2_ger(m, n, alpha, x, incx, y, incy, a, lda) dger_(m, n, alpha, x, incx, y, incy, a, lda)
 #endif
@@ -617,9 +617,9 @@ dger_(const unsigned *m, const unsigned *n, const double *alpha,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cgeru_(const unsigned *m, const unsigned *n, const float _Complex *alpha,
-    const float _Complex *x, const unsigned *incx, const float _Complex *y,
-    const unsigned *incy, float _Complex *a, const unsigned *lda);
+cgeru_(const LAPACK_INT *m, const LAPACK_INT *n, const float _Complex *alpha,
+    const float _Complex *x, const LAPACK_INT *incx, const float _Complex *y,
+    const LAPACK_INT *incy, float _Complex *a, const LAPACK_INT *lda);
 /** @endcond */
 #define h2_geru(m, n, alpha, x, incx, y, incy, a, lda) cgeru_(m, n, alpha, x, incx, y, incy, a, lda)
 #else
@@ -629,9 +629,9 @@ cgeru_(const unsigned *m, const unsigned *n, const float _Complex *alpha,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zgeru_(const unsigned *m, const unsigned *n, const double _Complex *alpha,
-    const double _Complex *x, const unsigned *incx, const double _Complex *y,
-    const unsigned *incy, double _Complex *a, const unsigned *lda);
+zgeru_(const LAPACK_INT *m, const LAPACK_INT *n, const double _Complex *alpha,
+    const double _Complex *x, const LAPACK_INT *incx, const double _Complex *y,
+    const LAPACK_INT *incy, double _Complex *a, const LAPACK_INT *lda);
 /** @endcond */
 #define h2_geru(m, n, alpha, x, incx, y, incy, a, lda) zgeru_(m, n, alpha, x, incx, y, incy, a, lda)
 #else
@@ -662,16 +662,16 @@ zgeru_(const unsigned *m, const unsigned *n, const double _Complex *alpha,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cher_(const char *uplo, const unsigned *n, const float *alpha,
-    const float _Complex *x, const unsigned *incx, float _Complex *a,
-    const unsigned *lda);
+cher_(const char *uplo, const LAPACK_INT *n, const float *alpha,
+    const float _Complex *x, const LAPACK_INT *incx, float _Complex *a,
+    const LAPACK_INT *lda);
 /** @endcond */
 #define h2_syr(uplo, n, alpha, x, incx, a, lda) cher_(uplo, n, alpha, x, incx, a, lda)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-ssyr_(const char *uplo, const unsigned *n, const float *alpha, const float *x,
-    const unsigned *incx, float *a, const unsigned *lda);
+ssyr_(const char *uplo, const LAPACK_INT *n, const float *alpha, const float *x,
+    const LAPACK_INT *incx, float *a, const LAPACK_INT *lda);
 /** @endcond */
 #define h2_syr(uplo, n, alpha, x, incx, a, lda) ssyr_(uplo, n, alpha, x, incx, a, lda)
 #endif
@@ -679,16 +679,16 @@ ssyr_(const char *uplo, const unsigned *n, const float *alpha, const float *x,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zher_(const char *uplo, const unsigned *n, const double *alpha,
-    const double _Complex *x, const unsigned *incx, double _Complex *a,
-    const unsigned *lda);
+zher_(const char *uplo, const LAPACK_INT *n, const double *alpha,
+    const double _Complex *x, const LAPACK_INT *incx, double _Complex *a,
+    const LAPACK_INT *lda);
 /** @endcond */
 #define h2_syr(uplo, n, alpha, x, incx, a, lda) zher_(uplo, n, alpha, x, incx, a, lda)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dsyr_(const char *uplo, const unsigned *n, const double *alpha, const double *x,
-    const unsigned *incx, double *a, const unsigned *lda);
+dsyr_(const char *uplo, const LAPACK_INT *n, const double *alpha, const double *x,
+    const LAPACK_INT *incx, double *a, const LAPACK_INT *lda);
 /** @endcond */
 #define h2_syr(uplo, n, alpha, x, incx, a, lda) dsyr_(uplo, n, alpha, x, incx, a, lda)
 #endif
@@ -735,20 +735,20 @@ dsyr_(const char *uplo, const unsigned *n, const double *alpha, const double *x,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cgemm_(const char *transa, const char *transb, const unsigned *m,
-    const unsigned *n, const unsigned *k, const float _Complex *alpha,
-    const float _Complex *a, const unsigned *lda, const float _Complex *b,
-    const unsigned *ldb, const float _Complex *beta, float _Complex *c,
-    const unsigned *ldc);
+cgemm_(const char *transa, const char *transb, const LAPACK_INT *m,
+    const LAPACK_INT *n, const LAPACK_INT *k, const float _Complex *alpha,
+    const float _Complex *a, const LAPACK_INT *lda, const float _Complex *b,
+    const LAPACK_INT *ldb, const float _Complex *beta, float _Complex *c,
+    const LAPACK_INT *ldc);
 /** @endcond */
 #define h2_gemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc) cgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-sgemm_(const char *transa, const char *transb, const unsigned *m,
-    const unsigned *n, const unsigned *k, const float *alpha, const float *a,
-    const unsigned *lda, const float *b, const unsigned *ldb,
-    const float *beta, float *c, const unsigned *ldc);
+sgemm_(const char *transa, const char *transb, const LAPACK_INT *m,
+    const LAPACK_INT *n, const LAPACK_INT *k, const float *alpha, const float *a,
+    const LAPACK_INT *lda, const float *b, const LAPACK_INT *ldb,
+    const float *beta, float *c, const LAPACK_INT *ldc);
 /** @endcond */
 #define h2_gemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc) sgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
 #endif
@@ -756,20 +756,20 @@ sgemm_(const char *transa, const char *transb, const unsigned *m,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zgemm_(const char *transa, const char *transb, const unsigned *m,
-    const unsigned *n, const unsigned *k, const double _Complex *alpha,
-    const double _Complex *a, const unsigned *lda, const double _Complex *b,
-    const unsigned *ldb, const double _Complex *beta, double _Complex *c,
-    const unsigned *ldc);
+zgemm_(const char *transa, const char *transb, const LAPACK_INT *m,
+    const LAPACK_INT *n, const LAPACK_INT *k, const double _Complex *alpha,
+    const double _Complex *a, const LAPACK_INT *lda, const double _Complex *b,
+    const LAPACK_INT *ldb, const double _Complex *beta, double _Complex *c,
+    const LAPACK_INT *ldc);
 /** @endcond */
 #define h2_gemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc) zgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dgemm_(const char *transa, const char *transb, const unsigned *m,
-    const unsigned *n, const unsigned *k, const double *alpha, const double *a,
-    const unsigned *lda, const double *b, const unsigned *ldb,
-    const double *beta, double *c, const unsigned *ldc);
+dgemm_(const char *transa, const char *transb, const LAPACK_INT *m,
+    const LAPACK_INT *n, const LAPACK_INT *k, const double *alpha, const double *a,
+    const LAPACK_INT *lda, const double *b, const LAPACK_INT *ldb,
+    const double *beta, double *c, const LAPACK_INT *ldc);
 /** @endcond */
 #define h2_gemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc) dgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
 #endif
@@ -815,17 +815,17 @@ dgemm_(const char *transa, const char *transb, const unsigned *m,
 /** @cond IMPORT */
 IMPORT_PREFIX void
 ctrmm_(const char *side, const char *uplo, const char *transa, const char *diag,
-    const unsigned *m, const unsigned *n, const float _Complex *alpha,
-    const float _Complex *a, const unsigned *lda, float _Complex *b,
-    const unsigned *ldb);
+    const LAPACK_INT *m, const LAPACK_INT *n, const float _Complex *alpha,
+    const float _Complex *a, const LAPACK_INT *lda, float _Complex *b,
+    const LAPACK_INT *ldb);
 /** @endcond */
 #define h2_trmm(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb) ctrmm_(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
 strmm_(const char *side, const char *uplo, const char *transa, const char *diag,
-    const unsigned *m, const unsigned *n, const float *alpha, const float *a,
-    const unsigned *lda, float *b, const unsigned *ldb);
+    const LAPACK_INT *m, const LAPACK_INT *n, const float *alpha, const float *a,
+    const LAPACK_INT *lda, float *b, const LAPACK_INT *ldb);
 /** @endcond */
 #define h2_trmm(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb) strmm_(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb)
 #endif
@@ -834,17 +834,17 @@ strmm_(const char *side, const char *uplo, const char *transa, const char *diag,
 /** @cond IMPORT */
 IMPORT_PREFIX void
 ztrmm_(const char *side, const char *uplo, const char *transa, const char *diag,
-    const unsigned *m, const unsigned *n, const double _Complex *alpha,
-    const double _Complex *a, const unsigned *lda, double _Complex *b,
-    const unsigned *ldb);
+    const LAPACK_INT *m, const LAPACK_INT *n, const double _Complex *alpha,
+    const double _Complex *a, const LAPACK_INT *lda, double _Complex *b,
+    const LAPACK_INT *ldb);
 /** @endcond */
 #define h2_trmm(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb) ztrmm_(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
 dtrmm_(const char *side, const char *uplo, const char *transa, const char *diag,
-    const unsigned *m, const unsigned *n, const double *alpha, const double *a,
-    const unsigned *lda, double *b, const unsigned *ldb);
+    const LAPACK_INT *m, const LAPACK_INT *n, const double *alpha, const double *a,
+    const LAPACK_INT *lda, double *b, const LAPACK_INT *ldb);
 /** @endcond */
 #define h2_trmm(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb) dtrmm_(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb)
 #endif
@@ -887,17 +887,17 @@ dtrmm_(const char *side, const char *uplo, const char *transa, const char *diag,
 /** @cond IMPORT */
 IMPORT_PREFIX void
 ctrsm_(const char *side, const char *uplo, const char *transa, const char *diag,
-    const unsigned *m, const unsigned *n, const float _Complex *alpha,
-    const float _Complex *a, const unsigned *lda, _Complex float *b,
-    const unsigned *ldb);
+    const LAPACK_INT *m, const LAPACK_INT *n, const float _Complex *alpha,
+    const float _Complex *a, const LAPACK_INT *lda, _Complex float *b,
+    const LAPACK_INT *ldb);
 /** @endcond */
 #define h2_trsm(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb) ctrsm_(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
 strsm_(const char *side, const char *uplo, const char *transa, const char *diag,
-    const unsigned *m, const unsigned *n, const float *alpha, const float *a,
-    const unsigned *lda, float *b, const unsigned *ldb);
+    const LAPACK_INT *m, const LAPACK_INT *n, const float *alpha, const float *a,
+    const LAPACK_INT *lda, float *b, const LAPACK_INT *ldb);
 /** @endcond */
 #define h2_trsm(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb) strsm_(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb)
 #endif
@@ -906,17 +906,17 @@ strsm_(const char *side, const char *uplo, const char *transa, const char *diag,
 /** @cond IMPORT */
 IMPORT_PREFIX void
 ztrsm_(const char *side, const char *uplo, const char *transa, const char *diag,
-    const unsigned *m, const unsigned *n, const double _Complex *alpha,
-    const double _Complex *a, const unsigned *lda, _Complex double *b,
-    const unsigned *ldb);
+    const LAPACK_INT *m, const LAPACK_INT *n, const double _Complex *alpha,
+    const double _Complex *a, const LAPACK_INT *lda, _Complex double *b,
+    const LAPACK_INT *ldb);
 /** @endcond */
 #define h2_trsm(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb) ztrsm_(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
 dtrsm_(const char *side, const char *uplo, const char *transa, const char *diag,
-    const unsigned *m, const unsigned *n, const double *alpha, const double *a,
-    const unsigned *lda, double *b, const unsigned *ldb);
+    const LAPACK_INT *m, const LAPACK_INT *n, const double *alpha, const double *a,
+    const LAPACK_INT *lda, double *b, const LAPACK_INT *ldb);
 /** @endcond */
 #define h2_trsm(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb) dtrsm_(side, uplo, transa, diag, m, n, alpha, a, lda, b, ldb)
 #endif
@@ -943,7 +943,7 @@ dtrsm_(const char *side, const char *uplo, const char *transa, const char *diag,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-clacgv_(const unsigned *n, float _Complex *x, const unsigned *incx);
+clacgv_(const LAPACK_INT *n, float _Complex *x, const LAPACK_INT *incx);
 /** @endcond */
 #define h2_lacgv(n, x, incx) clacgv_(n, x, incx)
 #else
@@ -953,7 +953,7 @@ clacgv_(const unsigned *n, float _Complex *x, const unsigned *incx);
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zlacgv_(const unsigned *n, double _Complex *x, const unsigned *incx);
+zlacgv_(const LAPACK_INT *n, double _Complex *x, const LAPACK_INT *incx);
 /** @endcond */
 #define h2_lacgv(n, x, incx) zlacgv_(n, x, incx)
 #else
@@ -988,15 +988,15 @@ zlacgv_(const unsigned *n, double _Complex *x, const unsigned *incx);
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cpotrf_(const char *uplo, const unsigned *n, float _Complex *a,
-    const unsigned *lda, int *info);
+cpotrf_(const char *uplo, const LAPACK_INT *n, float _Complex *a,
+    const LAPACK_INT *lda, LAPACK_INT *info);
 /** @endcond */
 #define h2_potrf(uplo, n, a, lda, info) cpotrf_(uplo, n, a, lda, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-spotrf_(const char *uplo, const unsigned *n, float *a, const unsigned *lda,
-    int *info);
+spotrf_(const char *uplo, const LAPACK_INT *n, float *a, const LAPACK_INT *lda,
+    LAPACK_INT *info);
 /** @endcond */
 #define h2_potrf(uplo, n, a, lda, info) spotrf_(uplo, n, a, lda, info)
 #endif
@@ -1004,15 +1004,15 @@ spotrf_(const char *uplo, const unsigned *n, float *a, const unsigned *lda,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zpotrf_(const char *uplo, const unsigned *n, double _Complex *a,
-    const unsigned *lda, int *info);
+zpotrf_(const char *uplo, const LAPACK_INT *n, double _Complex *a,
+    const LAPACK_INT *lda, LAPACK_INT *info);
 /** @endcond */
 #define h2_potrf(uplo, n, a, lda, info) zpotrf_(uplo, n, a, lda, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dpotrf_(const char *uplo, const unsigned *n, double *a, const unsigned *lda,
-    int *info);
+dpotrf_(const char *uplo, const LAPACK_INT *n, double *a, const LAPACK_INT *lda,
+    LAPACK_INT *info);
 /** @endcond */
 #define h2_potrf(uplo, n, a, lda, info) dpotrf_(uplo, n, a, lda, info)
 #endif
@@ -1046,16 +1046,16 @@ dpotrf_(const char *uplo, const unsigned *n, double *a, const unsigned *lda,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-clarf_(const char *side, const unsigned *m, const unsigned *n,
-    const float _Complex *v, const unsigned *incv, const float _Complex *tau,
-    float _Complex *c, const unsigned *ldc, float _Complex *work);
+clarf_(const char *side, const LAPACK_INT *m, const LAPACK_INT *n,
+    const float _Complex *v, const LAPACK_INT *incv, const float _Complex *tau,
+    float _Complex *c, const LAPACK_INT *ldc, float _Complex *work);
 /** @endcond */
 #define h2_larf(side, m, n, v, incv, tau, c, ldc, work) clarf_(side, m, n, v, incv, tau, c, ldc, work)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-slarf_(const char *side, const unsigned *m, const unsigned *n, const float *v,
-    const unsigned *incv, const float *tau, float *c, const unsigned *ldc,
+slarf_(const char *side, const LAPACK_INT *m, const LAPACK_INT *n, const float *v,
+    const LAPACK_INT *incv, const float *tau, float *c, const LAPACK_INT *ldc,
     float *work);
 /** @endcond */
 #define h2_larf(side, m, n, v, incv, tau, c, ldc, work) slarf_(side, m, n, v, incv, tau, c, ldc, work)
@@ -1064,16 +1064,16 @@ slarf_(const char *side, const unsigned *m, const unsigned *n, const float *v,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zlarf_(const char *side, const unsigned *m, const unsigned *n,
-    const double _Complex *v, const unsigned *incv, const double _Complex *tau,
-    double _Complex *c, const unsigned *ldc, double _Complex *work);
+zlarf_(const char *side, const LAPACK_INT *m, const LAPACK_INT *n,
+    const double _Complex *v, const LAPACK_INT *incv, const double _Complex *tau,
+    double _Complex *c, const LAPACK_INT *ldc, double _Complex *work);
 /** @endcond */
 #define h2_larf(side, m, n, v, incv, tau, c, ldc, work) zlarf_(side, m, n, v, incv, tau, c, ldc, work)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dlarf_(const char *side, const unsigned *m, const unsigned *n, const double *v,
-    const unsigned *incv, const double *tau, double *c, const unsigned *ldc,
+dlarf_(const char *side, const LAPACK_INT *m, const LAPACK_INT *n, const double *v,
+    const LAPACK_INT *incv, const double *tau, double *c, const LAPACK_INT *ldc,
     double *work);
 /** @endcond */
 #define h2_larf(side, m, n, v, incv, tau, c, ldc, work) dlarf_(side, m, n, v, incv, tau, c, ldc, work)
@@ -1104,14 +1104,14 @@ dlarf_(const char *side, const unsigned *m, const unsigned *n, const double *v,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-clarfg_(const unsigned *n, float _Complex *alpha, float _Complex *x,
-    const unsigned *incx, float _Complex *tau);
+clarfg_(const LAPACK_INT *n, float _Complex *alpha, float _Complex *x,
+    const LAPACK_INT *incx, float _Complex *tau);
 /** @endcond */
 #define h2_larfg(n, alpha, x, incx, tau) clarfg_(n, alpha, x, incx, tau)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-slarfg_(const unsigned *n, float *alpha, float *x, const unsigned *incx, float *tau);
+slarfg_(const LAPACK_INT *n, float *alpha, float *x, const LAPACK_INT *incx, float *tau);
 /** @endcond */
 #define h2_larfg(n, alpha, x, incx, tau) slarfg_(n, alpha, x, incx, tau)
 #endif
@@ -1119,14 +1119,14 @@ slarfg_(const unsigned *n, float *alpha, float *x, const unsigned *incx, float *
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zlarfg_(const unsigned *n, double _Complex *alpha, double _Complex *x,
-    const unsigned *incx, double _Complex *tau);
+zlarfg_(const LAPACK_INT *n, double _Complex *alpha, double _Complex *x,
+    const LAPACK_INT *incx, double _Complex *tau);
 /** @endcond */
 #define h2_larfg(n, alpha, x, incx, tau) zlarfg_(n, alpha, x, incx, tau)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dlarfg_(const unsigned *n, double *alpha, double *x, const unsigned *incx,
+dlarfg_(const LAPACK_INT *n, double *alpha, double *x, const LAPACK_INT *incx,
     double *tau);
 /** @endcond */
 #define h2_larfg(n, alpha, x, incx, tau) dlarfg_(n, alpha, x, incx, tau)
@@ -1161,16 +1161,16 @@ dlarfg_(const unsigned *n, double *alpha, double *x, const unsigned *incx,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cgeqrf_(const unsigned *m, const unsigned *n, float _Complex *a,
-    const unsigned *lda, float _Complex *tau, float _Complex *work,
-    const int *lwork, int *info);
+cgeqrf_(const LAPACK_INT *m, const LAPACK_INT *n, float _Complex *a,
+    const LAPACK_INT *lda, float _Complex *tau, float _Complex *work,
+    LAPACK_INT *lwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_geqrf(m, n, a, lda, tau, work, lwork, info) cgeqrf_(m, n, a, lda, tau, work, lwork, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-sgeqrf_(const unsigned *m, const unsigned *n, float *a, const unsigned *lda,
-    float *tau, float *work, const int *lwork, int *info);
+sgeqrf_(const LAPACK_INT *m, const LAPACK_INT *n, float *a, const LAPACK_INT *lda,
+    float *tau, float *work, LAPACK_INT *lwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_geqrf(m, n, a, lda, tau, work, lwork, info) sgeqrf_(m, n, a, lda, tau, work, lwork, info)
 #endif
@@ -1178,16 +1178,16 @@ sgeqrf_(const unsigned *m, const unsigned *n, float *a, const unsigned *lda,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zgeqrf_(const unsigned *m, const unsigned *n, double _Complex *a,
-    const unsigned *lda, double _Complex *tau, double _Complex *work,
-    const int *lwork, int *info);
+zgeqrf_(const LAPACK_INT *m, const LAPACK_INT *n, double _Complex *a,
+    const LAPACK_INT *lda, double _Complex *tau, double _Complex *work,
+    LAPACK_INT *lwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_geqrf(m, n, a, lda, tau, work, lwork, info) zgeqrf_(m, n, a, lda, tau, work, lwork, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dgeqrf_(const unsigned *m, const unsigned *n, double *a, const unsigned *lda,
-    double *tau, double *work, const int *lwork, int *info);
+dgeqrf_(const LAPACK_INT *m, const LAPACK_INT *n, double *a, const LAPACK_INT *lda,
+    double *tau, double *work, LAPACK_INT *lwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_geqrf(m, n, a, lda, tau, work, lwork, info) dgeqrf_(m, n, a, lda, tau, work, lwork, info)
 #endif
@@ -1234,19 +1234,19 @@ dgeqrf_(const unsigned *m, const unsigned *n, double *a, const unsigned *lda,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cunmqr_(const char *side, const char *trans, const unsigned *m,
-    const unsigned *n, const unsigned *k, const float _Complex *a,
-    const unsigned *lda, const float _Complex *tau, float _Complex *c,
-    const unsigned *ldc, float _Complex *work, const int *lwork, int *info);
+cunmqr_(const char *side, const char *trans, const LAPACK_INT *m,
+    const LAPACK_INT *n, const LAPACK_INT *k, const float _Complex *a,
+    const LAPACK_INT *lda, const float _Complex *tau, float _Complex *c,
+    const LAPACK_INT *ldc, float _Complex *work, LAPACK_INT *lwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_ormqr(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork, info) cunmqr_(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-sormqr_(const char *side, const char *trans, const unsigned *m,
-    const unsigned *n, const unsigned *k, const float *a, const unsigned *lda,
-    const float *tau, float *c, const unsigned *ldc, float *work,
-    const int *lwork, int *info);
+sormqr_(const char *side, const char *trans, const LAPACK_INT *m,
+    const LAPACK_INT *n, const LAPACK_INT *k, const float *a, const LAPACK_INT *lda,
+    const float *tau, float *c, const LAPACK_INT *ldc, float *work,
+    LAPACK_INT *lwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_ormqr(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork, info) sormqr_(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork, info)
 #endif
@@ -1254,19 +1254,19 @@ sormqr_(const char *side, const char *trans, const unsigned *m,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zunmqr_(const char *side, const char *trans, const unsigned *m,
-    const unsigned *n, const unsigned *k, const double _Complex *a,
-    const unsigned *lda, const double _Complex *tau, double _Complex *c,
-    const unsigned *ldc, double _Complex *work, const int *lwork, int *info);
+zunmqr_(const char *side, const char *trans, const LAPACK_INT *m,
+    const LAPACK_INT *n, const LAPACK_INT *k, const double _Complex *a,
+    const LAPACK_INT *lda, const double _Complex *tau, double _Complex *c,
+    const LAPACK_INT *ldc, double _Complex *work, LAPACK_INT *lwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_ormqr(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork, info) zunmqr_(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dormqr_(const char *side, const char *trans, const unsigned *m,
-    const unsigned *n, const unsigned *k, const double *a, const unsigned *lda,
-    const double *tau, double *c, const unsigned *ldc, double *work,
-    const int *lwork, int *info);
+dormqr_(const char *side, const char *trans, const LAPACK_INT *m,
+    const LAPACK_INT *n, const LAPACK_INT *k, const double *a, const LAPACK_INT *lda,
+    const double *tau, double *c, const LAPACK_INT *ldc, double *work,
+    LAPACK_INT *lwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_ormqr(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork, info) dormqr_(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork, info)
 #endif
@@ -1300,17 +1300,17 @@ dormqr_(const char *side, const char *trans, const unsigned *m,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cungqr_(const unsigned *m, const unsigned *n, const unsigned *k,
-    float _Complex *a, const unsigned *lda, float _Complex *tau,
-    float _Complex *work, const unsigned *lwork, unsigned *info);
+cungqr_(const LAPACK_INT *m, const LAPACK_INT *n, const LAPACK_INT *k,
+    float _Complex *a, const LAPACK_INT *lda, float _Complex *tau,
+    float _Complex *work, const LAPACK_INT *lwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_orgqr(m, n, k, a, lda, tau, work, lwork, info) cungqr_(m, n, k, a, lda, tau, work, lwork, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-sorgqr_(const unsigned *m, const unsigned *n, const unsigned *k, float *a,
-    const unsigned *lda, float *tau, float *work, const unsigned *lwork,
-    unsigned *info);
+sorgqr_(const LAPACK_INT *m, const LAPACK_INT *n, const LAPACK_INT *k, float *a,
+    const LAPACK_INT *lda, float *tau, float *work, const LAPACK_INT *lwork,
+    LAPACK_INT *info);
 /** @endcond */
 #define h2_orgqr(m, n, k, a, lda, tau, work, lwork, info) sorgqr_(m, n, k, a, lda, tau, work, lwork, info)
 #endif
@@ -1318,17 +1318,17 @@ sorgqr_(const unsigned *m, const unsigned *n, const unsigned *k, float *a,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zungqr_(const unsigned *m, const unsigned *n, const unsigned *k,
-    double _Complex *a, const unsigned *lda, double _Complex *tau,
-    double _Complex *work, const unsigned *lwork, unsigned *info);
+zungqr_(const LAPACK_INT *m, const LAPACK_INT *n, const LAPACK_INT *k,
+    double _Complex *a, const LAPACK_INT *lda, double _Complex *tau,
+    double _Complex *work, const LAPACK_INT *lwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_orgqr(m, n, k, a, lda, tau, work, lwork, info) zungqr_(m, n, k, a, lda, tau, work, lwork, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dorgqr_(const unsigned *m, const unsigned *n, const unsigned *k, double *a,
-    const unsigned *lda, double *tau, double *work, const unsigned *lwork,
-    unsigned *info);
+dorgqr_(const LAPACK_INT *m, const LAPACK_INT *n, const LAPACK_INT *k, double *a,
+    const LAPACK_INT *lda, double *tau, double *work, const LAPACK_INT *lwork,
+    LAPACK_INT *info);
 /** @endcond */
 #define h2_orgqr(m, n, k, a, lda, tau, work, lwork, info) dorgqr_(m, n, k, a, lda, tau, work, lwork, info)
 #endif
@@ -1360,15 +1360,15 @@ dorgqr_(const unsigned *m, const unsigned *n, const unsigned *k, double *a,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-csteqr_(const char *compz, const unsigned *n, float *d, float *e,
-    float _Complex *z, const unsigned *ldz, float *work, int *info);
+csteqr_(const char *compz, const LAPACK_INT *n, float *d, float *e,
+    float _Complex *z, const LAPACK_INT *ldz, float *work, LAPACK_INT *info);
 /** @endcond */
 #define h2_steqr(compz, n, d, e, z, ldz, work, info) csteqr_(compz, n, d, e, z, ldz, work, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-ssteqr_(const char *compz,const unsigned *n,float *d,float *e, float *z,
-    const unsigned *ldz, float *work, int *info);
+ssteqr_(const char *compz,const LAPACK_INT *n,float *d,float *e, float *z,
+    const LAPACK_INT *ldz, float *work, LAPACK_INT *info);
 /** @endcond */
 #define h2_steqr(compz, n, d, e, z, ldz, work, info) ssteqr_(compz, n, d, e, z, ldz, work, info)
 #endif
@@ -1376,15 +1376,15 @@ ssteqr_(const char *compz,const unsigned *n,float *d,float *e, float *z,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zsteqr_(const char *compz, const unsigned *n, double *d, double *e,
-    double _Complex *z, const unsigned *ldz, double *work, int *info);
+zsteqr_(const char *compz, const LAPACK_INT *n, double *d, double *e,
+    double _Complex *z, const LAPACK_INT *ldz, double *work, LAPACK_INT *info);
 /** @endcond */
 #define h2_steqr(compz, n, d, e, z, ldz, work, info) zsteqr_(compz, n, d, e, z, ldz, work, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dsteqr_(const char *compz, const unsigned *n, double *d, double *e, double *z,
-    const unsigned *ldz, double *work, int *info);
+dsteqr_(const char *compz, const LAPACK_INT *n, double *d, double *e, double *z,
+    const LAPACK_INT *ldz, double *work, LAPACK_INT *info);
 /** @endcond */
 #define h2_steqr(compz, n, d, e, z, ldz, work, info) dsteqr_(compz, n, d, e, z, ldz, work, info)
 #endif
@@ -1413,15 +1413,15 @@ dsteqr_(const char *compz, const unsigned *n, double *d, double *e, double *z,
 #ifdef USE_FLOAT
 /** @cond IMPORT */
 IMPORT_PREFIX void
-sstev_(const char *jobz, const unsigned *n, float *d, float *e, float *z,
-    const unsigned *ldz, float *work, int *info);
+sstev_(const char *jobz, const LAPACK_INT *n, float *d, float *e, float *z,
+    const LAPACK_INT *ldz, float *work, LAPACK_INT *info);
 /** @endcond */
 #define h2_stev(jobz, n, d, e, z, ldz, work, info) sstev_(jobz, n, d, e, z, ldz, work, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dstev_(const char *jobz, const unsigned *n, double *d, double *e, double *z,
-    const unsigned *ldz, double *work, int *info);
+dstev_(const char *jobz, const LAPACK_INT *n, double *d, double *e, double *z,
+    const LAPACK_INT *ldz, double *work, LAPACK_INT *info);
 /** @endcond */
 #define h2_stev(jobz, n, d, e, z, ldz, work, info) dstev_(jobz, n, d, e, z, ldz, work, info)
 #endif
@@ -1467,20 +1467,20 @@ dstev_(const char *jobz, const unsigned *n, double *d, double *e, double *z,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cgesvd_(const char *jobu, const char *jobvt, const unsigned *m,
-    const unsigned *n, float _Complex *a, const unsigned *lda, float *s,
-    float _Complex *u, const unsigned *ldu, float _Complex *vt,
-    const unsigned *ldvt, float _Complex *work, const unsigned *lwork,
-    float *rwork, int *info);
+cgesvd_(const char *jobu, const char *jobvt, const LAPACK_INT *m,
+    const LAPACK_INT *n, float _Complex *a, const LAPACK_INT *lda, float *s,
+    float _Complex *u, const LAPACK_INT *ldu, float _Complex *vt,
+    const LAPACK_INT *ldvt, float _Complex *work, const LAPACK_INT *lwork,
+    float *rwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_gesvd(jobu, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, info) cgesvd_(jobu, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-sgesvd_(const char *jobu, const char *jobvt, const unsigned *m,
-    const unsigned *n, float *a, const unsigned *lda, float *s, float *u,
-    const unsigned *ldu, float *vt, const unsigned *ldvt, float *work,
-    const unsigned *lwork, int *info);
+sgesvd_(const char *jobu, const char *jobvt, const LAPACK_INT *m,
+    const LAPACK_INT *n, float *a, const LAPACK_INT *lda, float *s, float *u,
+    const LAPACK_INT *ldu, float *vt, const LAPACK_INT *ldvt, float *work,
+    const LAPACK_INT *lwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_gesvd(jobu, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, info) sgesvd_(jobu, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, info)
 #endif
@@ -1488,20 +1488,20 @@ sgesvd_(const char *jobu, const char *jobvt, const unsigned *m,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zgesvd_(const char *jobu, const char *jobvt, const unsigned *m,
-    const unsigned *n, double _Complex *a, const unsigned *lda, double *s,
-    double _Complex *u, const unsigned *ldu, double _Complex *vt,
-    const unsigned *ldvt, double _Complex *work, const unsigned *lwork,
-    double *rwork, int *info);
+zgesvd_(const char *jobu, const char *jobvt, const LAPACK_INT *m,
+    const LAPACK_INT *n, double _Complex *a, const LAPACK_INT *lda, double *s,
+    double _Complex *u, const LAPACK_INT *ldu, double _Complex *vt,
+    const LAPACK_INT *ldvt, double _Complex *work, const LAPACK_INT *lwork,
+    double *rwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_gesvd(jobu, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, info) zgesvd_(jobu, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dgesvd_(const char *jobu, const char *jobvt, const unsigned *m,
-    const unsigned *n, double *a, const unsigned *lda, double *s, double *u,
-    const unsigned *ldu, double *vt, const unsigned *ldvt, double *work,
-    const unsigned *lwork, int *info);
+dgesvd_(const char *jobu, const char *jobvt, const LAPACK_INT *m,
+    const LAPACK_INT *n, double *a, const LAPACK_INT *lda, double *s, double *u,
+    const LAPACK_INT *ldu, double *vt, const LAPACK_INT *ldvt, double *work,
+    const LAPACK_INT *lwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_gesvd(jobu, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, info) dgesvd_(jobu, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, info)
 #endif
@@ -1550,20 +1550,20 @@ dgesvd_(const char *jobu, const char *jobvt, const unsigned *m,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cbdsqr_(const char *uplo, const unsigned *n, const unsigned *ncvt,
-    const unsigned *nru, const unsigned *ncc, float *d, float *e,
-    float _Complex *vt, const unsigned *ldvt, float _Complex *u,
-    const unsigned *ldu, float _Complex *c, const unsigned *ldc, float *rwork,
-    int *info);
+cbdsqr_(const char *uplo, const LAPACK_INT *n, const LAPACK_INT *ncvt,
+    const LAPACK_INT *nru, const LAPACK_INT *ncc, float *d, float *e,
+    float _Complex *vt, const LAPACK_INT *ldvt, float _Complex *u,
+    const LAPACK_INT *ldu, float _Complex *c, const LAPACK_INT *ldc, float *rwork,
+    LAPACK_INT *info);
 /** @endcond */
 #define h2_bdsqr(uplo, n, ncvt, nru, ncc, d, e, vt, ldvt, u, ldu, c, ldc, rwork, info) cbdsqr_(uplo, n, ncvt, nru, ncc, d, e, vt, ldvt, u, ldu, c, ldc, rwork, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-sbdsqr_(const char *uplo, const unsigned *n, const unsigned *ncvt,
-    const unsigned *nru, const unsigned *ncc, float *d, float *e, float *vt,
-    const unsigned *ldvt, float *u, const unsigned *ldu, float *c,
-    const unsigned *ldc, float *rwork, int *info);
+sbdsqr_(const char *uplo, const LAPACK_INT *n, const LAPACK_INT *ncvt,
+    const LAPACK_INT *nru, const LAPACK_INT *ncc, float *d, float *e, float *vt,
+    const LAPACK_INT *ldvt, float *u, const LAPACK_INT *ldu, float *c,
+    const LAPACK_INT *ldc, float *rwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_bdsqr(uplo, n, ncvt, nru, ncc, d, e, vt, ldvt, u, ldu, c, ldc, rwork, info) sbdsqr_(uplo, n, ncvt, nru, ncc, d, e, vt, ldvt, u, ldu, c, ldc, rwork, info)
 #endif
@@ -1571,20 +1571,20 @@ sbdsqr_(const char *uplo, const unsigned *n, const unsigned *ncvt,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zbdsqr_(const char *uplo, const unsigned *n, const unsigned *ncvt,
-    const unsigned *nru, const unsigned *ncc, double *d, double *e,
-    double _Complex *vt, const unsigned *ldvt, double _Complex *u,
-    const unsigned *ldu, double _Complex *c, const unsigned *ldc, double *rwork,
-    int *info);
+zbdsqr_(const char *uplo, const LAPACK_INT *n, const LAPACK_INT *ncvt,
+    const LAPACK_INT *nru, const LAPACK_INT *ncc, double *d, double *e,
+    double _Complex *vt, const LAPACK_INT *ldvt, double _Complex *u,
+    const LAPACK_INT *ldu, double _Complex *c, const LAPACK_INT *ldc, double *rwork,
+    LAPACK_INT *info);
 /** @endcond */
 #define h2_bdsqr(uplo, n, ncvt, nru, ncc, d, e, vt, ldvt, u, ldu, c, ldc, rwork, info) zbdsqr_(uplo, n, ncvt, nru, ncc, d, e, vt, ldvt, u, ldu, c, ldc, rwork, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dbdsqr_(const char *uplo, const unsigned *n, const unsigned *ncvt,
-    const unsigned *nru, const unsigned *ncc, double *d, double *e, double *vt,
-    const unsigned *ldvt, double *u, const unsigned *ldu, double *c,
-    const unsigned *ldc, double *rwork, int *info);
+dbdsqr_(const char *uplo, const LAPACK_INT *n, const LAPACK_INT *ncvt,
+    const LAPACK_INT *nru, const LAPACK_INT *ncc, double *d, double *e, double *vt,
+    const LAPACK_INT *ldvt, double *u, const LAPACK_INT *ldu, double *c,
+    const LAPACK_INT *ldc, double *rwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_bdsqr(uplo, n, ncvt, nru, ncc, d, e, vt, ldvt, u, ldu, c, ldc, rwork, info) dbdsqr_(uplo, n, ncvt, nru, ncc, d, e, vt, ldvt, u, ldu, c, ldc, rwork, info)
 #endif
@@ -1620,17 +1620,17 @@ dbdsqr_(const char *uplo, const unsigned *n, const unsigned *ncvt,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-cheev_(const char *jobz, const char *uplo, const unsigned *n, float _Complex *a,
-    const unsigned *lda, const float *w, float _Complex *work,
-    const unsigned *lwork, float *rwork, int *info);
+cheev_(const char *jobz, const char *uplo, const LAPACK_INT *n, float _Complex *a,
+    const LAPACK_INT *lda, const float *w, float _Complex *work,
+    const LAPACK_INT *lwork, float *rwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_heev(jobz, uplo, n, a, lda, w, work, lwork, rwork, info) cheev_(jobz, uplo, n, a, lda, w, work, lwork, rwork, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-ssyev_(const char *jobz, const char *uplo, const unsigned *n, float *a,
-    const unsigned *lda, const float *w, float *work, const unsigned *lwork,
-    int *info);
+ssyev_(const char *jobz, const char *uplo, const LAPACK_INT *n, float *a,
+    const LAPACK_INT *lda, const float *w, float *work, const LAPACK_INT *lwork,
+    LAPACK_INT *info);
 /** @endcond */
 #define h2_heev(jobz, uplo, n, a, lda, w, work, lwork, rwork, info) ssyev_(jobz, uplo, n, a, lda, w, work, lwork, info)
 #endif
@@ -1638,17 +1638,17 @@ ssyev_(const char *jobz, const char *uplo, const unsigned *n, float *a,
 #ifdef USE_COMPLEX
 /** @cond IMPORT */
 IMPORT_PREFIX void
-zheev_(const char *jobz, const char *uplo, const unsigned *n,
-    double _Complex *a, const unsigned *lda, const double *w,
-    double _Complex *work, const unsigned *lwork, double *rwork, int *info);
+zheev_(const char *jobz, const char *uplo, const LAPACK_INT *n,
+    double _Complex *a, const LAPACK_INT *lda, const double *w,
+    double _Complex *work, const LAPACK_INT *lwork, double *rwork, LAPACK_INT *info);
 /** @endcond */
 #define h2_heev(jobz, uplo, n, a, lda, w, work, lwork, rwork, info) zheev_(jobz, uplo, n, a, lda, w, work, lwork, rwork, info)
 #else
 /** @cond IMPORT */
 IMPORT_PREFIX void
-dsyev_(const char *jobz, const char *uplo, const unsigned *n, double *a,
-    const unsigned *lda, const double *w, double *work, const unsigned *lwork,
-    int *info);
+dsyev_(const char *jobz, const char *uplo, const LAPACK_INT *n, double *a,
+    const LAPACK_INT *lda, const double *w, double *work, const LAPACK_INT *lwork,
+    LAPACK_INT *info);
 /** @endcond */
 #define h2_heev(jobz, uplo, n, a, lda, w, work, lwork, rwork, info) dsyev_(jobz, uplo, n, a, lda, w, work, lwork, info)
 #endif

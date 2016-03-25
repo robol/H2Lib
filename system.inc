@@ -7,7 +7,7 @@ RM = rm
 CC = gcc
 GCC = gcc
 
-CFLAGS = -Wall -fPIC
+CFLAGS = -Wall -fPIC -g -O0
 LDFLAGS = -Wl,-L,.,-R,.
 LIBS =
 
@@ -41,7 +41,7 @@ ifdef USE_BLAS
 endif
 
 ifdef USE_MATLAB_BLAS
-  CFLAGS += -DUSE_BLAS 
+  CFLAGS += -DUSE_BLAS -DLAPACK_USE_LONGS
   LIBS += -lmwlapack -lmwblas -lgfortran
 
   # Select the path of your Matlab installation

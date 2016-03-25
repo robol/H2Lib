@@ -267,9 +267,9 @@ print_realavector(pcrealavector v)
 void
 scale_realavector(real alpha, prealavector v)
 {
-  uint      dim = v->dim / 2;
+  LAPACK_INT dim = v->dim / 2;
 
-  h2_rscal(&dim, &alpha, (field *) v->v, &u_one);
+  h2_rscal(&dim, &alpha, (field *) v->v, &l_one);
 }
 #else
 void
@@ -286,9 +286,9 @@ scale_realavector(real alpha, prealavector v)
 real
 norm2_realavector(pcrealavector v)
 {
-  uint      dim = v->dim / 2;
+  LAPACK_INT      dim = v->dim / 2;
 
-  return h2_nrm2(&dim, (field *) v->v, &u_one);
+  return h2_nrm2(&dim, (field *) v->v, &l_one);
 }
 #else
 real
@@ -310,8 +310,9 @@ real
 dotprod_realavector(pcrealavector x, pcrealavector y)
 {
   assert(x->dim == y->dim);
+  LAPACK_INT x_dim = x->dim;
 
-  return h2_rdot(&x->dim, x->v, &u_one, y->v, &u_one);
+  return h2_rdot(&x_dim, x->v, &l_one, y->v, &l_one);
 }
 #else
 real
@@ -335,8 +336,9 @@ void
 add_realavector(real alpha, pcrealavector x, prealavector y)
 {
   assert(x->dim == y->dim);
+  LAPACK_INT x_dim = x->dim;
 
-  h2_raxpy(&x->dim, &alpha, x->v, &u_one, y->v, &u_one);
+  h2_raxpy(&x_dim, &alpha, x->v, &l_one, y->v, &l_one);
 }
 #else
 void

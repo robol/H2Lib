@@ -212,9 +212,10 @@ diageval_tridiag_amatrix(field alpha, bool atrans, pctridiag a,
   pcreal    d = a->d;
   uint      n = a->size;
   pfield    xa = x->a;
-  uint      ldx = x->ld;
+  LAPACK_INT ldx = x->ld;
   field     beta;
   unsigned  i;
+  LAPACK_INT x_rows = x->rows, x_cols = x->cols;
 
   if (n < 1)			/* Quick exit */
     return;
@@ -225,7 +226,7 @@ diageval_tridiag_amatrix(field alpha, bool atrans, pctridiag a,
     for (i = 0; i < n; i++) {
       beta = (atrans ? CONJ(alpha * d[i]) : CONJ(alpha) * d[i]);
 
-      h2_scal(&x->rows, &beta, xa + i * ldx, &u_one);
+      h2_scal(&x_rows, &beta, xa + i * ldx, &l_one);
     }
   }
   else {
@@ -234,7 +235,7 @@ diageval_tridiag_amatrix(field alpha, bool atrans, pctridiag a,
     for (i = 0; i < n; i++) {
       beta = (atrans ? alpha * CONJ(d[i]) : alpha * d[i]);
 
-      h2_scal(&x->cols, &beta, xa + i, &ldx);
+      h2_scal(&x_cols, &beta, xa + i, &ldx);
     }
   }
 }
@@ -285,9 +286,10 @@ lowereval_tridiag_amatrix(field alpha, bool atrans, pctridiag a,
   pcreal    l = a->l;
   uint      n = a->size;
   pfield    xa = x->a;
-  uint      ldx = x->ld;
+  LAPACK_INT ldx = x->ld;
   field     beta, gamma;
   uint      i;
+  LAPACK_INT x_cols = x->cols, x_rows = x->rows;
 
   if (n < 1)			/* Quick exit */
     return;
@@ -300,13 +302,13 @@ lowereval_tridiag_amatrix(field alpha, bool atrans, pctridiag a,
 	beta = CONJ(alpha) * d[i];
 	gamma = CONJ(alpha) * l[i];
 
-	h2_scal(&x->rows, &beta, xa + i * ldx, &u_one);
-	h2_axpy(&x->rows, &gamma, xa + (i + 1) * ldx, &u_one, xa + i * ldx,
-		&u_one);
+	h2_scal(&x_rows, &beta, xa + i * ldx, &l_one);
+	h2_axpy(&x_rows, &gamma, xa + (i + 1) * ldx, &l_one, xa + i * ldx,
+		&l_one);
       }
       beta = CONJ(alpha) * d[n - 1];
 
-      h2_scal(&x->rows, &beta, xa + (n - 1) * ldx, &u_one);
+      h2_scal(&x_rows, &beta, xa + (n - 1) * ldx, &l_one);
     }
     else {
       assert(x->rows == a->size);
@@ -315,12 +317,12 @@ lowereval_tridiag_amatrix(field alpha, bool atrans, pctridiag a,
 	beta = alpha * CONJ(d[i]);
 	gamma = alpha * CONJ(l[i]);
 
-	h2_scal(&x->cols, &beta, xa + i, &ldx);
-	h2_axpy(&x->cols, &gamma, xa + (i + 1), &ldx, xa + i, &ldx);
+	h2_scal(&x_cols, &beta, xa + i, &ldx);
+	h2_axpy(&x_cols, &gamma, xa + (i + 1), &ldx, xa + i, &ldx);
       }
       beta = alpha * CONJ(d[n - 1]);
 
-      h2_scal(&x->cols, &beta, xa + (n - 1), &ldx);
+      h2_scal(&x_cols, &beta, xa + (n - 1), &ldx);
     }
   }
   else {
@@ -331,13 +333,13 @@ lowereval_tridiag_amatrix(field alpha, bool atrans, pctridiag a,
 	beta = CONJ(alpha * d[i]);
 	gamma = CONJ(alpha * l[i - 1]);
 
-	h2_scal(&x->rows, &beta, xa + i * ldx, &u_one);
-	h2_axpy(&x->rows, &gamma, xa + (i - 1) * ldx, &u_one, xa + i * ldx,
-		&u_one);
+	h2_scal(&x_rows, &beta, xa + i * ldx, &l_one);
+	h2_axpy(&x_rows, &gamma, xa + (i - 1) * ldx, &l_one, xa + i * ldx,
+		&l_one);
       }
       beta = CONJ(alpha * d[0]);
 
-      h2_scal(&x->rows, &beta, xa, &u_one);
+      h2_scal(&x_rows, &beta, xa, &l_one);
     }
     else {
       assert(x->rows == a->size);
@@ -346,12 +348,12 @@ lowereval_tridiag_amatrix(field alpha, bool atrans, pctridiag a,
 	beta = alpha * d[i];
 	gamma = alpha * l[i - 1];
 
-	h2_scal(&x->cols, &beta, xa + i, &ldx);
-	h2_axpy(&x->cols, &gamma, xa + (i - 1), &ldx, xa + i, &ldx);
+	h2_scal(&x_cols, &beta, xa + i, &ldx);
+	h2_axpy(&x_cols, &gamma, xa + (i - 1), &ldx, xa + i, &ldx);
       }
       beta = alpha * d[0];
 
-      h2_scal(&x->cols, &beta, xa, &ldx);
+      h2_scal(&x_cols, &beta, xa, &ldx);
     }
   }
 }
@@ -714,17 +716,18 @@ uint
 muleig_tridiag(ptridiag T, pamatrix Q)
 {
   preal     work;
-  int       info = 0;
+  LAPACK_INT       info = 0;
+  LAPACK_INT T_size = T->size, Q_ld = Q->ld;
 
   if (T->size > 1) {
     if (Q) {
       work = allocreal(2 * T->size + 2);
-      h2_steqr(_h2_vectors, &T->size, T->d, T->l, Q->a, &Q->ld, work, &info);
+      h2_steqr(_h2_vectors, &T_size, T->d, T->l, Q->a, &Q_ld, work, &info);
       assert(info >= 0);
       freemem(work);
     }
     else {
-      h2_stev(_h2_novectors, &T->size, T->d, T->l, NULL, &u_one, NULL, &info);
+      h2_stev(_h2_novectors, &T_size, T->d, T->l, NULL, &l_one, NULL, &info);
       assert(info >= 0);
     }
   }
@@ -889,12 +892,12 @@ void
 tridiagonalize_amatrix(pamatrix A, ptridiag T, pamatrix Q)
 {
   pfield    aa;
-  uint      lda;
+  LAPACK_INT lda;
   pfield    qa;
-  uint      ldq;
+  LAPACK_INT ldq;
   preal     d, l, u;
   pfield    work;
-  uint      n, n1;
+  LAPACK_INT n, n1;
   uint      k;
   field     alpha, beta;
   field     nsign, psign;
@@ -936,7 +939,7 @@ tridiagonalize_amatrix(pamatrix A, ptridiag T, pamatrix Q)
     /* Determine Householder vector */
     n1 = n - k - 1;
     alpha = aa[(k + 1) + k * lda];
-    h2_larfg(&n1, &alpha, aa + (k + 2) + k * lda, &u_one, &beta);
+    h2_larfg(&n1, &alpha, aa + (k + 2) + k * lda, &l_one, &beta);
 
     /* Compute k-th column */
     nsign = SIGN1(alpha);
@@ -946,22 +949,22 @@ tridiagonalize_amatrix(pamatrix A, ptridiag T, pamatrix Q)
     /* Update remaining columns */
     aa[(k + 1) + k * lda] = 1.0;
     beta = CONJ(beta);
-    h2_larf(_h2_left, &n1, &n1, aa + (k + 1) + k * lda, &u_one, &beta,
+    h2_larf(_h2_left, &n1, &n1, aa + (k + 1) + k * lda, &l_one, &beta,
 	    aa + (k + 1) + (k + 1) * lda, &lda, work);
 
     /* Update remaining rows */
     beta = CONJ(beta);
-    h2_larf(_h2_right, &n1, &n1, aa + (k + 1) + k * lda, &u_one, &beta,
+    h2_larf(_h2_right, &n1, &n1, aa + (k + 1) + k * lda, &l_one, &beta,
 	    aa + (k + 1) + (k + 1) * lda, &lda, work);
 
     if (Q) {
       /* Update Q */
-      h2_larf(_h2_right, &n, &n1, aa + (k + 1) + k * lda, &u_one, &beta,
+      h2_larf(_h2_right, &n, &n1, aa + (k + 1) + k * lda, &l_one, &beta,
 	      qa + (k + 1) * ldq, &ldq, work);
 
       /* Adjust sign of column k+1 */
       beta = nsign * CONJ(psign);
-      h2_scal(&n, &beta, qa + (k + 1) * ldq, &u_one);
+      h2_scal(&n, &beta, qa + (k + 1) * ldq, &l_one);
 
       /* Update sign */
       psign *= CONJ(nsign);
@@ -1033,9 +1036,10 @@ eig_amatrix(pamatrix A, prealavector lambda, pamatrix Q)
 #ifdef USE_COMPLEX
   preal     rwork;
 #endif
-  unsigned  lwork;
-  uint      n = A->rows;
-  int       info = 0;
+  LAPACK_INT lwork;
+  LAPACK_INT n = A->rows;
+  LAPACK_INT       info = 0;
+  LAPACK_INT A_ld = A->ld;
 
   /* Quick exit if trivial matrix */
   if (n < 2) {
@@ -1051,12 +1055,12 @@ eig_amatrix(pamatrix A, prealavector lambda, pamatrix Q)
 #endif
 
   if (Q) {
-    h2_heev(_h2_vectors, _h2_lower, &n, A->a, &A->ld, lambda->v,
+    h2_heev(_h2_vectors, _h2_lower, &n, A->a, &A_ld, lambda->v,
 	    work, &lwork, rwork, &info);
     copy_amatrix(false, A, Q);
   }
   else {
-    h2_heev(_h2_novectors, _h2_lower, &n, A->a, &A->ld, lambda->v,
+    h2_heev(_h2_novectors, _h2_lower, &n, A->a, &A_ld, lambda->v,
 	    work, &lwork, rwork, &info);
   }
 
@@ -1488,19 +1492,21 @@ sb_mulsvd_tridiag(ptridiag T, pamatrix U, pamatrix Vt, uint maxiter)
 uint
 mulsvd_tridiag(ptridiag T, pamatrix U, pamatrix Vt)
 {
-  uint      lwork;
+  LAPACK_INT lwork;
   real     *work;
-  int       info;
+  LAPACK_INT       info;
+  LAPACK_INT T_size = T->size, Vt_cols = Vt->cols, U_rows = U->rows, Vt_ld = Vt->ld, 
+    U_ld = U->ld;
 
   if (T->size < 1)
     return 0;
 
   lwork = 4 * T->size;
   work = allocreal(lwork);
-  h2_bdsqr(_h2_lower, &T->size, (Vt ? &Vt->cols : &u_zero),
-	   (U ? &U->rows : &u_zero), &u_zero, T->d, T->l, (Vt ? Vt->a : 0),
-	   (Vt ? &Vt->ld : &u_one), (U ? U->a : 0), (U ? &U->ld : &u_one), 0,
-	   &u_one, work, &info);
+  h2_bdsqr(_h2_lower, &T_size, (Vt ? &Vt_cols : &l_zero),
+	   (U ? &U_rows : &l_zero), &l_zero, T->d, T->l, (Vt ? Vt->a : 0),
+	   (Vt ? &Vt_ld : &l_one), (U ? U->a : 0), (U ? &U_ld : &l_one), 0,
+	   &l_one, work, &info);
 
   freemem(work);
 
@@ -1857,9 +1863,9 @@ bidiagonalize_amatrix(pamatrix A, ptridiag T, pamatrix U, pamatrix Vt)
   pfield    a, ua, va, work, tau;
   preal     d, l;
   field     alpha, beta, nsign;
-  uint      rows, cols, lda, ldu, ldv;
-  uint      rows1, cols1;
-  uint      size, lwork;
+  LAPACK_INT rows, cols, lda, ldu, ldv;
+  LAPACK_INT rows1, cols1;
+  LAPACK_INT size, lwork;
   uint      i, j, k;
 
   rows = A->rows;
@@ -1900,7 +1906,7 @@ bidiagonalize_amatrix(pamatrix A, ptridiag T, pamatrix U, pamatrix Vt)
 
       /* Determine Householder reflection vector v */
       alpha = a[k + k * lda];
-      h2_larfg(&rows1, &alpha, a + (k + 1) + k * lda, &u_one, &beta);
+      h2_larfg(&rows1, &alpha, a + (k + 1) + k * lda, &l_one, &beta);
 
       /* Store scaling factor */
       tau[k] = beta;
@@ -1911,7 +1917,7 @@ bidiagonalize_amatrix(pamatrix A, ptridiag T, pamatrix U, pamatrix Vt)
 
       /* Update columns k+1,...,cols */
       cols1 = cols - (k + 1);
-      h2_larf(_h2_left, &rows1, &cols1, a + k + k * lda, &u_one, &beta,
+      h2_larf(_h2_left, &rows1, &cols1, a + k + k * lda, &l_one, &beta,
 	      a + k + (k + 1) * lda, &lda, work);
 
       /* Store diagonal element */
@@ -1929,7 +1935,7 @@ bidiagonalize_amatrix(pamatrix A, ptridiag T, pamatrix U, pamatrix Vt)
 
 	  rows1 = rows - k;
 	  cols1 = U->cols;
-	  h2_larf(_h2_left, &rows1, &cols1, a + k + k * lda, &u_one, &beta,
+	  h2_larf(_h2_left, &rows1, &cols1, a + k + k * lda, &l_one, &beta,
 		  ua + k, &ldu, work);
 
 	  a[k + k * lda] = alpha;
@@ -2056,7 +2062,7 @@ bidiagonalize_amatrix(pamatrix A, ptridiag T, pamatrix U, pamatrix Vt)
 
       /* Determine Householder reflection vector v */
       alpha = a[(k + 1) + k * lda];
-      h2_larfg(&rows1, &alpha, a + (k + 2) + k * lda, &u_one, &beta);
+      h2_larfg(&rows1, &alpha, a + (k + 2) + k * lda, &l_one, &beta);
 
       /* Store subdiagonal element */
       nsign = SIGN1(alpha);
@@ -2068,7 +2074,7 @@ bidiagonalize_amatrix(pamatrix A, ptridiag T, pamatrix U, pamatrix Vt)
       /* Update columns k+1,...,cols */
       beta = CONJ(beta);
       cols1 = size - k - 1;
-      h2_larf(_h2_left, &rows1, &cols1, a + (k + 1) + k * lda, &u_one, &beta,
+      h2_larf(_h2_left, &rows1, &cols1, a + (k + 1) + k * lda, &l_one, &beta,
 	      a + (k + 1) + (k + 1) * lda, &lda, work);
 
       for (j = k + 1; j < cols; j++)
@@ -2079,7 +2085,7 @@ bidiagonalize_amatrix(pamatrix A, ptridiag T, pamatrix U, pamatrix Vt)
 	beta = CONJ(beta);
 	rows1 = U->rows;
 	cols1 = rows - (k + 1);
-	h2_larf(_h2_right, &rows1, &cols1, a + (k + 1) + k * lda, &u_one,
+	h2_larf(_h2_right, &rows1, &cols1, a + (k + 1) + k * lda, &l_one,
 		&beta, ua + (k + 1) * ldu, &ldu, work);
 
 	for (j = 0; j < U->rows; j++)
@@ -2251,11 +2257,13 @@ uint
 svd_amatrix(pamatrix A, prealavector sigma, pamatrix U, pamatrix Vt)
 {
   pfield    work;
-  unsigned  lwork;
+  LAPACK_INT lwork;
 #ifdef USE_COMPLEX
   preal     rwork;
 #endif
-  int       info = 0;
+  LAPACK_INT       info = 0;
+  LAPACK_INT A_rows = A->rows, A_cols = A->cols, A_ld = A->ld, 
+    U_ld = U->ld, Vt_ld = Vt->ld;
 
   assert(sigma->dim >= UINT_MIN(A->rows, A->cols));
 
@@ -2267,22 +2275,22 @@ svd_amatrix(pamatrix A, prealavector sigma, pamatrix U, pamatrix Vt)
 
     h2_gesvd((U ? _h2_skinnyvectors : _h2_novectors),
 	     (Vt ? _h2_skinnyvectors : _h2_novectors),
-	     &A->rows, &A->cols,
-	     A->a, &A->ld,
+	     &A_rows, &A_cols,
+	     A->a, &A_ld,
 	     sigma->v,
-	     (U ? U->a : NULL), (U ? &U->ld : &u_one),
-	     (Vt ? Vt->a : NULL), (Vt ? &Vt->ld : &u_one),
+	     (U ? U->a : NULL), (U ? &U_ld : &l_one),
+	     (Vt ? Vt->a : NULL), (Vt ? &Vt_ld : &l_one),
 	     work, &lwork, rwork, &info);
 
     freemem(rwork);
 #else
     h2_gesvd((U ? _h2_skinnyvectors : _h2_novectors),
 	     (Vt ? _h2_skinnyvectors : _h2_novectors),
-	     &A->rows, &A->cols,
-	     A->a, &A->ld,
+	     &A_rows, &A_cols,
+	     A->a, &A_ld,
 	     sigma->v,
-	     (U ? U->a : NULL), (U ? &U->ld : &u_one),
-	     (Vt ? Vt->a : NULL), (Vt ? &Vt->ld : &u_one),
+	     (U ? U->a : NULL), (U ? &U_ld : &l_one),
+	     (Vt ? Vt->a : NULL), (Vt ? &Vt_ld : &l_one),
 	     work, &lwork, &info);
 #endif
 

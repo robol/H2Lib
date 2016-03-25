@@ -12,6 +12,8 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "lapack_types.h"
+
 static uint active_amatrix = 0;
 
 /* ------------------------------------------------------------
@@ -104,7 +106,7 @@ init_pointer_amatrix(pamatrix a, pfield src, uint rows, uint cols)
 pamatrix
 init_zero_amatrix(pamatrix a, uint rows, uint cols)
 {
-  longindex lda;
+  LAPACK_INT lda;
   uint      i, j;
 
   init_amatrix(a, rows, cols);
@@ -120,7 +122,7 @@ init_zero_amatrix(pamatrix a, uint rows, uint cols)
 pamatrix
 init_identity_amatrix(pamatrix a, uint rows, uint cols)
 {
-  longindex lda;
+  LAPACK_INT lda;
   uint      i, j;
 
   init_amatrix(a, rows, cols);
@@ -235,7 +237,7 @@ void
 resizecopy_amatrix(pamatrix a, uint rows, uint cols)
 {
   pfield    new_a;
-  longindex lda, ldn;
+  LAPACK_INT lda, ldn;
   uint      i, j;
 
   assert(a->owner == NULL);
@@ -306,7 +308,7 @@ void
 clear_amatrix(pamatrix a)
 {
   uint      rows = a->rows;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   uint      i, j;
 
   for (j = 0; j < a->cols; j++)
@@ -319,7 +321,7 @@ clear_lower_amatrix(pamatrix a, bool strict)
 {
   uint      rows = a->rows;
   uint      cols = a->cols;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   uint      i, j;
 
   if (strict) {
@@ -343,7 +345,7 @@ clear_upper_amatrix(pamatrix a, bool strict)
 {
   uint      rows = a->rows;
   uint      cols = a->cols;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   uint      i, j;
 
   if (strict) {
@@ -367,7 +369,7 @@ identity_amatrix(pamatrix a)
 {
   uint      rows = a->rows;
   uint      cols = a->cols;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   uint      i, j;
 
   for (j = 0; j < cols; j++) {
@@ -386,7 +388,7 @@ random_amatrix(pamatrix a)
 {
   uint      rows = a->rows;
   uint      cols = a->cols;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
 
   uint      i, j;
 
@@ -402,7 +404,7 @@ random_invertible_amatrix(pamatrix a, real alpha)
 {
   pfield    aa = a->a;
   uint      rows = a->rows;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   real      sum;
   uint      i, j;
 
@@ -428,7 +430,7 @@ random_selfadjoint_amatrix(pamatrix a)
 {
   pfield    aa = a->a;
   uint      rows = a->rows;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   uint      i, j;
 
   assert(rows == a->cols);
@@ -447,7 +449,7 @@ random_spd_amatrix(pamatrix a, real alpha)
 {
   pfield    aa = a->a;
   uint      rows = a->rows;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   real      sum;
   uint      i, j;
 
@@ -500,8 +502,8 @@ clone_amatrix(pcamatrix src)
 void
 copy_sub_amatrix(bool atrans, pcamatrix a, pamatrix b)
 {
-  longindex lda = a->ld;
-  longindex ldb = b->ld;
+  LAPACK_INT lda = a->ld;
+  LAPACK_INT ldb = b->ld;
   uint      i, j, rows, cols;
 
   if (atrans) {
@@ -531,7 +533,7 @@ print_amatrix(pcamatrix a)
 {
   uint      rows = a->rows;
   uint      cols = a->cols;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   uint      i, j;
 
   (void) printf("amatrix(%u,%u,%u)\n", rows, cols, lda);
@@ -551,7 +553,7 @@ print_matlab_amatrix(pcamatrix a)
 {
   uint      rows = a->rows;
   uint      cols = a->cols;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   uint      i, j;
 
   if (rows == 0)
@@ -630,13 +632,13 @@ check_ortho_amatrix(bool atrans, pcamatrix a)
 void
 scale_amatrix(field alpha, pamatrix a)
 {
-  uint      rows = a->rows;
-  uint      cols = a->cols;
-  longindex lda = a->ld;
+  LAPACK_INT      rows = a->rows;
+  LAPACK_INT      cols = a->cols;
+  LAPACK_INT lda = a->ld;
   uint      j;
 
   for (j = 0; j < cols; j++) {
-    h2_scal(&rows, &alpha, a->a + j * lda, &u_one);
+    h2_scal(&rows, &alpha, a->a + j * lda, &l_one);
   }
 
 }
@@ -646,7 +648,7 @@ scale_amatrix(field alpha, pamatrix a)
 {
   uint      rows = a->rows;
   uint      cols = a->cols;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   uint      i, j;
 
   for (j = 0; j < cols; j++) {
@@ -663,7 +665,7 @@ conjugate_amatrix(pamatrix a)
 #ifdef USE_COMPLEX
   const uint rows = a->rows;
   const uint cols = a->cols;
-  const longindex ld = a->ld;
+  const LAPACK_INT ld = a->ld;
   field    *aa = a->a;
 
   uint      i, j;
@@ -752,7 +754,7 @@ field
 dotprod_amatrix(pcamatrix a, pcamatrix b)
 {
   field     sum;
-  uint      rows, cols;
+  LAPACK_INT      rows, cols;
   uint      j;
 
   rows = a->rows;
@@ -763,7 +765,7 @@ dotprod_amatrix(pcamatrix a, pcamatrix b)
 
   sum = 0.0;
   for (j = 0; j < cols; j++) {
-    sum += h2_dot(&rows, a->a + j * a->ld, &u_one, b->a + j * b->ld, &u_one);
+    sum += h2_dot(&rows, a->a + j * a->ld, &l_one, b->a + j * b->ld, &l_one);
   }
 
   return sum;
@@ -799,10 +801,11 @@ normfrob_amatrix(pcamatrix a)
 {
   real      sum;
   uint      j;
+  LAPACK_INT a_rows = a->rows, a_ld = a->ld;
 
   sum = 0.0;
   for (j = 0; j < a->cols; j++) {
-    sum += REAL_SQR(h2_nrm2(&a->rows, a->a + j * a->ld, &u_one));
+    sum += REAL_SQR(h2_nrm2(&a_rows, a->a + j * a_ld, &l_one));
   }
 
   return REAL_SQRT(sum);
@@ -832,9 +835,12 @@ addeval_amatrix_avector(field alpha, pcamatrix a, pcavector src, pavector trg)
   assert(src->dim >= a->cols);
   assert(trg->dim >= a->rows);
 
+  LAPACK_INT a_rows = a->rows, a_cols = a->cols, a_ld = a->ld;
+  
+
   if (a->rows > 0 && a->cols > 0) {
-    h2_gemv(_h2_ntrans, &a->rows, &a->cols, &alpha, a->a, &a->ld,
-	    src->v, &u_one, &f_one, trg->v, &u_one);
+    h2_gemv(_h2_ntrans, &a_rows, &a_cols, &alpha, a->a, &a_ld,
+	    src->v, &l_one, &f_one, trg->v, &l_one);
   }
 }
 
@@ -845,9 +851,11 @@ addevaltrans_amatrix_avector(field alpha, pcamatrix a, pcavector src,
   assert(src->dim >= a->rows);
   assert(trg->dim >= a->cols);
 
+  LAPACK_INT a_rows = a->rows, a_cols = a->cols, a_ld = a->ld;
+
   if (a->rows > 0 && a->cols > 0) {
-    h2_gemv(_h2_adj, &a->rows, &a->cols, &alpha, a->a, &a->ld,
-	    src->v, &u_one, &f_one, trg->v, &u_one);
+    h2_gemv(_h2_adj, &a_rows, &a_cols, &alpha, a->a, &a_ld,
+	    src->v, &l_one, &f_one, trg->v, &l_one);
   }
 }
 #else
@@ -855,7 +863,7 @@ void
 addeval_amatrix_avector(field alpha, pcamatrix a, pcavector src, pavector trg)
 {
   field     sum;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   uint      i, j;
 
   assert(src->dim >= a->cols);
@@ -875,7 +883,7 @@ addevaltrans_amatrix_avector(field alpha, pcamatrix a, pcavector src,
 			     pavector trg)
 {
   field     sum;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   uint      i, j;
 
   assert(src->dim >= a->rows);
@@ -905,10 +913,10 @@ mvm_amatrix_avector(field alpha, bool atrans, pcamatrix a, pcavector src,
 void
 add_amatrix(field alpha, bool atrans, pcamatrix a, pamatrix b)
 {
-  longindex lda = a->ld;
-  longindex ldb = b->ld;
-  uint      rows = a->rows;
-  uint      cols = a->cols;
+  LAPACK_INT lda = a->ld;
+  LAPACK_INT ldb = b->ld;
+  LAPACK_INT      rows = a->rows;
+  LAPACK_INT      cols = a->cols;
   uint      i;
 
   if (atrans) {
@@ -916,7 +924,7 @@ add_amatrix(field alpha, bool atrans, pcamatrix a, pamatrix b)
     assert(cols <= b->rows);
 
     for (i = 0; i < cols; ++i) {
-      h2_gerc(&u_one, &cols, &alpha, &f_one, &u_one, a->a + i * lda, &u_one,
+      h2_gerc(&l_one, &cols, &alpha, &f_one, &l_one, a->a + i * lda, &l_one,
 	      b->a + i, &ldb);
     }
 
@@ -926,7 +934,7 @@ add_amatrix(field alpha, bool atrans, pcamatrix a, pamatrix b)
     assert(cols <= b->cols);
 
     for (i = 0; i < cols; i++) {
-      h2_axpy(&rows, &alpha, a->a + i * lda, &u_one, b->a + i * ldb, &u_one);
+      h2_axpy(&rows, &alpha, a->a + i * lda, &l_one, b->a + i * ldb, &l_one);
     }
   }
 }
@@ -934,8 +942,8 @@ add_amatrix(field alpha, bool atrans, pcamatrix a, pamatrix b)
 void
 add_amatrix(field alpha, bool atrans, pcamatrix a, pamatrix b)
 {
-  longindex lda = a->ld;
-  longindex ldb = b->ld;
+  LAPACK_INT lda = a->ld;
+  LAPACK_INT ldb = b->ld;
   uint      rows = a->rows;
   uint      cols = a->cols;
   uint      i, j;
@@ -968,6 +976,9 @@ void
 addmul_amatrix(field alpha, bool atrans, pcamatrix a, bool btrans,
 	       pcamatrix b, pamatrix c)
 {
+  LAPACK_INT a_rows = a->rows, a_cols = a->cols, a_ld = a->ld;
+  LAPACK_INT b_rows = b->rows, b_ld = b->ld, b_cols = b->cols, c_ld = c->ld;
+
   if (atrans) {
     if (btrans) {
       assert(a->cols <= c->rows);
@@ -975,9 +986,9 @@ addmul_amatrix(field alpha, bool atrans, pcamatrix a, bool btrans,
       assert(a->rows == b->cols);
 
       if (a->cols > 0 && b->rows > 0 && a->rows > 0) {
-	h2_gemm(_h2_adj, _h2_adj, &a->cols,
-		&b->rows, &a->rows, &alpha, a->a, &a->ld, b->a, &b->ld,
-		&f_one, c->a, &c->ld);
+	h2_gemm(_h2_adj, _h2_adj, &a_cols,
+		&b_rows, &a_rows, &alpha, a->a, &a_ld, b->a, &b_ld,
+		&f_one, c->a, &c_ld);
       }
     }
     else {
@@ -986,9 +997,9 @@ addmul_amatrix(field alpha, bool atrans, pcamatrix a, bool btrans,
       assert(a->rows == b->rows);
 
       if (a->cols > 0 && b->cols > 0 && a->rows > 0) {
-	h2_gemm(_h2_adj, _h2_ntrans, &a->cols, &b->cols,
-		&a->rows, &alpha, a->a, &a->ld, b->a, &b->ld, &f_one, c->a,
-		&c->ld);
+	h2_gemm(_h2_adj, _h2_ntrans, &a_cols, &b_cols,
+		&a_rows, &alpha, a->a, &a_ld, b->a, &b_ld, &f_one, c->a,
+		&c_ld);
       }
     }
   }
@@ -999,9 +1010,9 @@ addmul_amatrix(field alpha, bool atrans, pcamatrix a, bool btrans,
       assert(a->cols == b->cols);
 
       if (a->rows > 0 && b->rows > 0 && a->cols > 0) {
-	h2_gemm(_h2_ntrans, _h2_adj, &a->rows, &b->rows,
-		&a->cols, &alpha, a->a, &a->ld, b->a, &b->ld, &f_one, c->a,
-		&c->ld);
+	h2_gemm(_h2_ntrans, _h2_adj, &a_rows, &b_rows,
+		&a_cols, &alpha, a->a, &a_ld, b->a, &b_ld, &f_one, c->a,
+		&c_ld);
       }
     }
     else {
@@ -1010,9 +1021,9 @@ addmul_amatrix(field alpha, bool atrans, pcamatrix a, bool btrans,
       assert(a->cols == b->rows);
 
       if (a->rows > 0 && b->cols > 0 && a->cols > 0) {
-	h2_gemm(_h2_ntrans, _h2_ntrans, &a->rows, &b->cols,
-		&a->cols, &alpha, a->a, &a->ld, b->a, &b->ld, &f_one, c->a,
-		&c->ld);
+	h2_gemm(_h2_ntrans, _h2_ntrans, &a_rows, &b_cols,
+		&a_cols, &alpha, a->a, &a_ld, b->a, &b_ld, &f_one, c->a,
+		&c_ld);
       }
     }
   }
@@ -1026,9 +1037,9 @@ addmul_amatrix(field alpha, bool atrans, pcamatrix a, bool btrans,
   pcfield   aa = a->a;
   pcfield   ba = b->a;
   pfield    ca = c->a;
-  longindex lda = a->ld;
-  longindex ldb = b->ld;
-  longindex ldc = c->ld;
+  LAPACK_INT lda = a->ld;
+  LAPACK_INT ldb = b->ld;
+  LAPACK_INT ldc = c->ld;
   register uint i, j, k;
 
   if (atrans) {
@@ -1116,6 +1127,7 @@ bidiagmul_amatrix(field alpha, bool atrans, pamatrix a, pcavector d,
 {
   field     beta, gamma;
   uint      j;
+  LAPACK_INT a_cols = a->cols, a_ld = a->ld, a_rows = a->rows;
 
   if (atrans) {
     assert(a->rows == d->dim);
@@ -1127,12 +1139,12 @@ bidiagmul_amatrix(field alpha, bool atrans, pamatrix a, pcavector d,
 
     for (j = 0; j + 1 < a->rows; j++) {
       gamma = CONJ(alpha * d->v[j]);
-      h2_scal(&a->cols, &gamma, a->a + j, &a->ld);
+      h2_scal(&a_cols, &gamma, a->a + j, &a_ld);
       beta = CONJ(alpha * l->v[j]);
-      h2_axpy(&a->cols, &beta, a->a + (j + 1), &a->ld, a->a + j, &a->ld);
+      h2_axpy(&a_cols, &beta, a->a + (j + 1), &a_ld, a->a + j, &a_ld);
     }
     gamma = CONJ(alpha * d->v[j]);
-    h2_scal(&a->cols, &gamma, a->a + j, &a->ld);
+    h2_scal(&a_cols, &gamma, a->a + j, &a_ld);
   }
   else {
     assert(a->cols == d->dim);
@@ -1144,13 +1156,13 @@ bidiagmul_amatrix(field alpha, bool atrans, pamatrix a, pcavector d,
 
     for (j = 0; j + 1 < a->cols; j++) {
       gamma = alpha * d->v[j];
-      h2_scal(&a->rows, &gamma, a->a + j * a->ld, &u_one);
+      h2_scal(&a_rows, &gamma, a->a + j * a_ld, &l_one);
       beta = alpha * l->v[j];
-      h2_axpy(&a->rows, &beta, a->a + (j + 1) * a->ld, &u_one,
-	      a->a + j * a->ld, &u_one);
+      h2_axpy(&a_rows, &beta, a->a + (j + 1) * a->ld, &l_one,
+	      a->a + j * a->ld, &l_one);
     }
     gamma = alpha * d->v[j];
-    h2_scal(&a->rows, &gamma, a->a + j * a->ld, &u_one);
+    h2_scal(&a_rows, &gamma, a->a + j * a->ld, &l_one);
   }
 }
 #else
@@ -1159,7 +1171,7 @@ bidiagmul_amatrix(field alpha, bool atrans, pamatrix a, pcavector d,
 		  pcavector l)
 {
   field     beta, gamma;
-  longindex lda = a->ld;
+  LAPACK_INT lda = a->ld;
   uint      i, j;
 
   if (atrans) {

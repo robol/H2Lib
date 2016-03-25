@@ -11,6 +11,8 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include "lapack_types.h"
+
 /** @defgroup settings settings
  *  @brief Fundamental types and macros.
  *  @{ */
@@ -77,6 +79,12 @@ extern const uint u_zero;
 
 /** @brief Unsigned integer constant one. */
 extern const uint u_one;
+
+/** @brief Unsigned integer constant zero. */
+extern const LAPACK_INT l_zero;
+
+/** @brief Unsigned integer constant one. */
+extern const LAPACK_INT l_one;
 
 /** @brief Unsigned long type.
  *

@@ -8,7 +8,7 @@
 #DEBUG=1
 
 # Build optimized
-OPT=1
+#OPT=1
 
 # Use complex numbers
 USE_COMPLEX=1

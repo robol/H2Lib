@@ -307,7 +307,9 @@ print_avector(pcavector v)
 void
 scale_avector(field alpha, pavector v)
 {
-  h2_scal(&v->dim, &alpha, v->v, &u_one);
+  LAPACK_INT v_dim = v->dim;
+
+  h2_scal(&v_dim, &alpha, v->v, &l_one);
 }
 #else
 void
@@ -324,7 +326,9 @@ scale_avector(field alpha, pavector v)
 real
 norm2_avector(pcavector v)
 {
-  return h2_nrm2(&v->dim, v->v, &u_one);
+  LAPACK_INT v_dim = v->dim;
+
+  return h2_nrm2(&v_dim, v->v, &l_one);
 }
 #else
 real
@@ -346,8 +350,9 @@ field
 dotprod_avector(pcavector x, pcavector y)
 {
   assert(x->dim == y->dim);
+  LAPACK_INT x_dim = x->dim;
 
-  return h2_dot(&x->dim, x->v, &u_one, y->v, &u_one);
+  return h2_dot(&x_dim, x->v, &l_one, y->v, &l_one);
 }
 #else
 field
@@ -371,8 +376,9 @@ void
 add_avector(field alpha, pcavector x, pavector y)
 {
   assert(y->dim >= x->dim);
+  LAPACK_INT x_dim = x->dim;
 
-  h2_axpy(&x->dim, &alpha, x->v, &u_one, y->v, &u_one);
+  h2_axpy(&x_dim, &alpha, x->v, &l_one, y->v, &l_one);
 }
 #else
 void

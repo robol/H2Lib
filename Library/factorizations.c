@@ -11,6 +11,8 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "lapack_types.h"
+
 /* ------------------------------------------------------------
  Diagonal matrices
  ------------------------------------------------------------ */
@@ -38,24 +40,26 @@ diagsolve_amatrix_avector(bool atrans, pcamatrix a, pavector x)
 void
 diagsolve_amatrix(bool atrans, pcamatrix a, bool xtrans, pamatrix x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      lda = a->ld;
-  uint      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      ldx = x->ld;
   field    *aa = a->a;
   field    *xa = x->a;
   field     alpha;
   uint      i;
 
+  LAPACK_INT x_rows = x->rows, x_cols = x->cols;
+
   if (xtrans) {
     for (i = 0; i < n; i++) {
       alpha = (atrans ? 1.0 / CONJ(aa[i + i * lda]) : 1.0 / aa[i + i * lda]);
-      h2_scal(&x->rows, &alpha, xa + i * ldx, &u_one);
+      h2_scal(&x_rows, &alpha, xa + i * ldx, &l_one);
     }
   }
   else {
     for (i = 0; i < n; i++) {
       alpha = (atrans ? 1.0 / CONJ(aa[i + i * lda]) : 1.0 / aa[i + i * lda]);
-      h2_scal(&x->cols, &alpha, xa + i, &ldx);
+      h2_scal(&x_cols, &alpha, xa + i, &ldx);
     }
   }
 }
@@ -110,24 +114,26 @@ diageval_amatrix_avector(bool atrans, pcamatrix a, pavector x)
 void
 diageval_amatrix(bool atrans, pcamatrix a, bool xtrans, pamatrix x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      lda = a->ld;
-  uint      ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      lda = a->ld;
+  LAPACK_INT      ldx = x->ld;
   field    *aa = a->a;
   field    *xa = x->a;
   field     alpha;
   uint      i;
 
+  LAPACK_INT x_rows = x->rows, x_cols = x->cols;
+
   if (xtrans) {
     for (i = 0; i < n; i++) {
       alpha = (atrans ? CONJ(aa[i + i * lda]) : aa[i + i * lda]);
-      h2_scal(&x->rows, &alpha, xa + i * ldx, &u_one);
+      h2_scal(&x_rows, &alpha, xa + i * ldx, &l_one);
     }
   }
   else {
     for (i = 0; i < n; i++) {
       alpha = (atrans ? CONJ(aa[i + i * lda]) : aa[i + i * lda]);
-      h2_scal(&x->cols, &alpha, xa + i, &ldx);
+      h2_scal(&x_cols, &alpha, xa + i, &ldx);
     }
   }
 }
@@ -167,9 +173,10 @@ diageval_realavector_amatrix(field alpha, bool atrans, pcrealavector a,
 {
   preal     av = a->v;
   pfield    xa = x->a;
-  longindex ldx = x->ld;
+  LAPACK_INT ldx = x->ld;
   field     beta;
   unsigned  j;
+  LAPACK_INT x_rows = x->rows, x_cols = x->cols;
 
   if (xtrans) {
     assert(x->cols <= a->dim);
@@ -180,7 +187,7 @@ diageval_realavector_amatrix(field alpha, bool atrans, pcrealavector a,
 
     for (j = 0; j < x->cols; j++) {
       beta = (atrans ? CONJ(alpha) * av[j] : CONJ(alpha * av[j]));
-      h2_scal(&x->rows, &beta, xa + j * ldx, &u_one);
+      h2_scal(&x_rows, &beta, xa + j * ldx, &l_one);
     }
   }
   else {
@@ -192,7 +199,7 @@ diageval_realavector_amatrix(field alpha, bool atrans, pcrealavector a,
 
     for (j = 0; j < x->rows; j++) {
       beta = (atrans ? alpha * CONJ(av[j]) : alpha * av[j]);
-      h2_scal(&x->cols, &beta, xa + j, &ldx);
+      h2_scal(&x_cols, &beta, xa + j, &ldx);
     }
   }
 }
@@ -247,36 +254,38 @@ diageval_realavector_amatrix(field alpha,
 static void
 lowersolve_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT a_ld = a->ld, x_dim = x->dim;
 
   assert(x->dim >= a->rows);
   assert(x->dim >= a->cols);
 
   if (atrans) {
     h2_trsm(_h2_left, _h2_lower, _h2_adj, (aunit ? _h2_unit : _h2_nonunit),
-	    &n, &u_one, &f_one, a->a, &a->ld, x->v, &x->dim);
+	    &n, &l_one, &f_one, a->a, &a_ld, x->v, &x_dim);
   }
   else {
     h2_trsm(_h2_left, _h2_lower, _h2_ntrans, (aunit ? _h2_unit : _h2_nonunit),
-	    &n, &u_one, &f_one, a->a, &a->ld, x->v, &x->dim);
+	    &n, &l_one, &f_one, a->a, &a_ld, x->v, &x_dim);
   }
 }
 
 static void
 uppersolve_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT  n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT  x_dim = x->dim, a_ld = a->ld;
 
   assert(x->dim >= a->rows);
   assert(x->dim >= a->cols);
 
   if (atrans) {
     h2_trsm(_h2_left, _h2_upper, _h2_adj, (aunit ? _h2_unit : _h2_nonunit),
-	    &n, &u_one, &f_one, a->a, &a->ld, x->v, &x->dim);
+	    &n, &l_one, &f_one, a->a, &a_ld, x->v, &x_dim);
   }
   else {
     h2_trsm(_h2_left, _h2_upper, _h2_ntrans, (aunit ? _h2_unit : _h2_nonunit),
-	    &n, &u_one, &f_one, a->a, &a->ld, x->v, &x->dim);
+	    &n, &l_one, &f_one, a->a, &a_ld, x->v, &x_dim);
   }
 }
 #else
@@ -354,25 +363,26 @@ static void
 lowersolve_amatrix(bool aunit, bool atrans, pcamatrix a,
 		   bool xtrans, pamatrix x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT n = UINT_MIN(a->rows, a->cols);
   field    *aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT      lda = a->ld;
   field    *xa = x->a;
-  uint      ldx = x->ld;
+  LAPACK_INT  ldx = x->ld;
+  LAPACK_INT x_cols = x->cols, x_rows = x->rows;
 
   if (atrans) {
     if (xtrans) {
       assert(x->cols >= n);
 
       h2_trsm(_h2_right, _h2_lower, _h2_ntrans,
-	      (aunit ? _h2_unit : _h2_nonunit), &x->rows, &n, &f_one, aa,
+	      (aunit ? _h2_unit : _h2_nonunit), &x_rows, &n, &f_one, aa,
 	      &lda, xa, &ldx);
     }
     else {
       assert(x->rows >= n);
 
       h2_trsm(_h2_left, _h2_lower, _h2_adj, (aunit ? _h2_unit : _h2_nonunit),
-	      &n, &x->cols, &f_one, aa, &lda, xa, &ldx);
+	      &n, &x_cols, &f_one, aa, &lda, xa, &ldx);
     }
   }
   else {
@@ -380,13 +390,13 @@ lowersolve_amatrix(bool aunit, bool atrans, pcamatrix a,
       assert(x->cols >= n);
 
       h2_trsm(_h2_right, _h2_lower, _h2_adj, (aunit ? _h2_unit : _h2_nonunit),
-	      &x->rows, &n, &f_one, aa, &lda, xa, &ldx);
+	      &x_rows, &n, &f_one, aa, &lda, xa, &ldx);
     }
     else {
       assert(x->rows >= n);
 
       h2_trsm(_h2_left, _h2_lower, _h2_ntrans,
-	      (aunit ? _h2_unit : _h2_nonunit), &n, &x->cols, &f_one, aa,
+	      (aunit ? _h2_unit : _h2_nonunit), &n, &x_cols, &f_one, aa,
 	      &lda, xa, &ldx);
     }
   }
@@ -396,25 +406,26 @@ static void
 uppersolve_amatrix(bool aunit, bool atrans, pcamatrix a,
 		   bool xtrans, pamatrix x)
 {
-  uint      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT  n = UINT_MIN(a->rows, a->cols);
   field    *aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT lda = a->ld;
   field    *xa = x->a;
-  uint      ldx = x->ld;
+  LAPACK_INT ldx = x->ld;
+  LAPACK_INT x_rows = x->rows, x_cols = x->cols;
 
   if (atrans) {
     if (xtrans) {
       assert(x->cols >= n);
 
       h2_trsm(_h2_right, _h2_upper, _h2_ntrans,
-	      (aunit ? _h2_unit : _h2_nonunit), &x->rows, &n, &f_one, aa,
+	      (aunit ? _h2_unit : _h2_nonunit), &x_rows, &n, &f_one, aa,
 	      &lda, xa, &ldx);
     }
     else {
       assert(x->rows >= n);
 
       h2_trsm(_h2_left, _h2_upper, _h2_adj, (aunit ? _h2_unit : _h2_nonunit),
-	      &n, &x->cols, &f_one, aa, &lda, xa, &ldx);
+	      &n, &x_cols, &f_one, aa, &lda, xa, &ldx);
     }
   }
   else {
@@ -422,13 +433,13 @@ uppersolve_amatrix(bool aunit, bool atrans, pcamatrix a,
       assert(x->cols >= n);
 
       h2_trsm(_h2_right, _h2_upper, _h2_adj, (aunit ? _h2_unit : _h2_nonunit),
-	      &x->rows, &n, &f_one, aa, &lda, xa, &ldx);
+	      &x_rows, &n, &f_one, aa, &lda, xa, &ldx);
     }
     else {
       assert(x->rows >= n);
 
       h2_trsm(_h2_left, _h2_upper, _h2_ntrans,
-	      (aunit ? _h2_unit : _h2_nonunit), &n, &x->cols, &f_one, aa,
+	      (aunit ? _h2_unit : _h2_nonunit), &n, &x_cols, &f_one, aa,
 	      &lda, xa, &ldx);
     }
   }
@@ -599,9 +610,9 @@ lowereval_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 {
   field    *aa = a->a;
   field    *xv = x->v;
-  uint      lda = a->ld;
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      n1, i;
+  LAPACK_INT lda = a->ld;
+  LAPACK_INT n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT n1, i;
 
   assert(x->dim >= a->rows);
   assert(x->dim >= a->cols);
@@ -612,13 +623,13 @@ lowereval_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
   if (atrans) {
     /* Left upper part, upper triangular */
     h2_trmv(_h2_lower, _h2_adj, (aunit ? _h2_unit : _h2_nonunit), &n, aa,
-	    &lda, xv, &u_one);
+	    &lda, xv, &l_one);
 
     /* Right part */
     if (n < a->rows) {
       n1 = a->rows - n;
-      h2_gemv(_h2_adj, &n1, &n, &f_one, aa + n, &lda, xv + n, &u_one, &f_one,
-	      xv, &u_one);
+      h2_gemv(_h2_adj, &n1, &n, &f_one, aa + n, &lda, xv + n, &l_one, &f_one,
+	      xv, &l_one);
     }
 
     /* Lower part */
@@ -633,13 +644,13 @@ lowereval_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 	xv[i] = 0.0;
 
       n1 = a->rows - n;
-      h2_gemv(_h2_ntrans, &n1, &n, &f_one, aa + n, &lda, xv, &u_one, &f_one,
-	      xv + n, &u_one);
+      h2_gemv(_h2_ntrans, &n1, &n, &f_one, aa + n, &lda, xv, &l_one, &f_one,
+	      xv + n, &l_one);
     }
 
     /* Top part, lower triangular */
     h2_trmv(_h2_lower, _h2_ntrans, (aunit ? _h2_unit : _h2_nonunit), &n, aa,
-	    &lda, xv, &u_one);
+	    &lda, xv, &l_one);
   }
 }
 
@@ -648,9 +659,9 @@ uppereval_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 {
   field    *aa = a->a;
   field    *xv = x->v;
-  uint      lda = a->ld;
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      n1, i;
+  LAPACK_INT lda = a->ld;
+  LAPACK_INT  n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT  n1, i;
 
   assert(x->dim >= a->rows);
   assert(x->dim >= a->cols);
@@ -665,24 +676,24 @@ uppereval_amatrix_avector(bool aunit, bool atrans, pcamatrix a, pavector x)
 	xv[i] = 0.0;
 
       n1 = a->cols - n;
-      h2_gemv(_h2_adj, &n, &n1, &f_one, aa + n * lda, &lda, xv, &u_one,
-	      &f_one, xv + n, &u_one);
+      h2_gemv(_h2_adj, &n, &n1, &f_one, aa + n * lda, &lda, xv, &l_one,
+	      &f_one, xv + n, &l_one);
     }
 
     /* Top part, lower triangular */
     h2_trmv(_h2_upper, _h2_adj, (aunit ? _h2_unit : _h2_nonunit), &n, aa,
-	    &lda, xv, &u_one);
+	    &lda, xv, &l_one);
   }
   else {
     /* Left upper part, upper triangular */
     h2_trmv(_h2_upper, _h2_ntrans, (aunit ? _h2_unit : _h2_nonunit), &n, aa,
-	    &lda, xv, &u_one);
+	    &lda, xv, &l_one);
 
     /* Right part */
     if (n < a->cols) {
       n1 = a->cols - n;
-      h2_gemv(_h2_ntrans, &n, &n1, &f_one, aa + n * lda, &lda, xv + n, &u_one,
-	      &f_one, xv, &u_one);
+      h2_gemv(_h2_ntrans, &n, &n1, &f_one, aa + n * lda, &lda, xv + n, &l_one,
+	      &f_one, xv, &l_one);
     }
 
     /* Lower part */
@@ -821,11 +832,12 @@ lowereval_amatrix(bool aunit, bool atrans, pcamatrix a, bool xtrans,
 		  pamatrix x)
 {
   field    *aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT lda = a->ld;
   field    *xa = x->a;
-  uint      ldx = x->ld;
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      n1, i, j;
+  LAPACK_INT ldx = x->ld;
+  LAPACK_INT  n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT  n1, i, j;
+  LAPACK_INT x_rows = x->rows, x_cols = x->cols;
 
   if (n == 0)			/* Quick exit */
     return;
@@ -837,13 +849,13 @@ lowereval_amatrix(bool aunit, bool atrans, pcamatrix a, bool xtrans,
     if (atrans) {
       /* Left upper part, upper triangular */
       h2_trmm(_h2_right, _h2_lower, _h2_ntrans,
-	      (aunit ? _h2_unit : _h2_nonunit), &x->rows, &n, &f_one, aa,
+	      (aunit ? _h2_unit : _h2_nonunit), &x_rows, &n, &f_one, aa,
 	      &lda, xa, &ldx);
 
       /* Right part */
       if (n < a->rows) {
 	n1 = a->rows - n;
-	h2_gemm(_h2_ntrans, _h2_ntrans, &x->rows, &n, &n1, &f_one,
+	h2_gemm(_h2_ntrans, _h2_ntrans, &x_rows, &n, &n1, &f_one,
 		xa + n * ldx, &ldx, aa + n, &lda, &f_one, xa, &ldx);
       }
 
@@ -861,13 +873,13 @@ lowereval_amatrix(bool aunit, bool atrans, pcamatrix a, bool xtrans,
 	    xa[j + i * ldx] = 0.0;
 
 	n1 = a->rows - n;
-	h2_gemm(_h2_ntrans, _h2_adj, &x->rows, &n1, &n, &f_one, xa, &ldx,
+	h2_gemm(_h2_ntrans, _h2_adj, &x_rows, &n1, &n, &f_one, xa, &ldx,
 		aa + n, &lda, &f_one, xa + n * ldx, &ldx);
       }
 
       /* Top part, lower triangular */
       h2_trmm(_h2_right, _h2_lower, _h2_adj, (aunit ? _h2_unit : _h2_nonunit),
-	      &x->rows, &n, &f_one, aa, &lda, xa, &ldx);
+	      &x_rows, &n, &f_one, aa, &lda, xa, &ldx);
     }
   }
   else {
@@ -877,12 +889,12 @@ lowereval_amatrix(bool aunit, bool atrans, pcamatrix a, bool xtrans,
     if (atrans) {
       /* Left upper part, upper triangular */
       h2_trmm(_h2_left, _h2_lower, _h2_adj, (aunit ? _h2_unit : _h2_nonunit),
-	      &n, &x->cols, &f_one, aa, &lda, xa, &ldx);
+	      &n, &x_cols, &f_one, aa, &lda, xa, &ldx);
 
       /* Right part */
       if (n < a->rows) {
 	n1 = a->rows - n;
-	h2_gemm(_h2_adj, _h2_ntrans, &n, &x->cols, &n1, &f_one, aa + n, &lda,
+	h2_gemm(_h2_adj, _h2_ntrans, &n, &x_cols, &n1, &f_one, aa + n, &lda,
 		xa + n, &ldx, &f_one, xa, &ldx);
       }
 
@@ -900,13 +912,13 @@ lowereval_amatrix(bool aunit, bool atrans, pcamatrix a, bool xtrans,
 	    xa[i + j * ldx] = 0.0;
 
 	n1 = a->rows - n;
-	h2_gemm(_h2_ntrans, _h2_ntrans, &n1, &x->cols, &n, &f_one, aa + n,
+	h2_gemm(_h2_ntrans, _h2_ntrans, &n1, &x_cols, &n, &f_one, aa + n,
 		&lda, xa, &ldx, &f_one, xa + n, &ldx);
       }
 
       /* Top part, lower triangular */
       h2_trmm(_h2_left, _h2_lower, _h2_ntrans,
-	      (aunit ? _h2_unit : _h2_nonunit), &n, &x->cols, &f_one, aa,
+	      (aunit ? _h2_unit : _h2_nonunit), &n, &x_cols, &f_one, aa,
 	      &lda, xa, &ldx);
     }
   }
@@ -917,11 +929,11 @@ uppereval_amatrix(bool aunit, bool atrans, pcamatrix a, bool xtrans,
 		  pamatrix x)
 {
   field    *aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT lda = a->ld;
   field    *xa = x->a;
-  uint      ldx = x->ld;
-  uint      n = UINT_MIN(a->rows, a->cols);
-  uint      n1, i, j;
+  LAPACK_INT ldx = x->ld;
+  LAPACK_INT      n = UINT_MIN(a->rows, a->cols);
+  LAPACK_INT      n1, i, j, x_rows = x->rows, x_cols = x->cols;
 
   if (n == 0)			/* Quick exit */
     return;
@@ -938,24 +950,24 @@ uppereval_amatrix(bool aunit, bool atrans, pcamatrix a, bool xtrans,
 	    xa[j + i * ldx] = 0.0;
 
 	n1 = a->cols - n;
-	h2_gemm(_h2_ntrans, _h2_ntrans, &x->rows, &n1, &n, &f_one, xa, &ldx,
+	h2_gemm(_h2_ntrans, _h2_ntrans, &x_rows, &n1, &n, &f_one, xa, &ldx,
 		aa + n * lda, &lda, &f_one, xa + n * ldx, &ldx);
       }
 
       /* Top part, lower triangular */
       h2_trmm(_h2_right, _h2_upper, _h2_ntrans,
-	      (aunit ? _h2_unit : _h2_nonunit), &x->rows, &n, &f_one, aa,
+	      (aunit ? _h2_unit : _h2_nonunit), &x_rows, &n, &f_one, aa,
 	      &lda, xa, &ldx);
     }
     else {
       /* Left upper part, upper triangular */
       h2_trmm(_h2_right, _h2_upper, _h2_adj, (aunit ? _h2_unit : _h2_nonunit),
-	      &x->rows, &n, &f_one, aa, &lda, xa, &ldx);
+	      &x_rows, &n, &f_one, aa, &lda, xa, &ldx);
 
       /* Right part */
       if (n < a->cols) {
 	n1 = a->cols - n;
-	h2_gemm(_h2_ntrans, _h2_adj, &x->rows, &n, &n1, &f_one, xa + n * ldx,
+	h2_gemm(_h2_ntrans, _h2_adj, &x_rows, &n, &n1, &f_one, xa + n * ldx,
 		&ldx, aa + n * lda, &lda, &f_one, xa, &ldx);
       }
 
@@ -978,24 +990,24 @@ uppereval_amatrix(bool aunit, bool atrans, pcamatrix a, bool xtrans,
 	    xa[i + j * ldx] = 0.0;
 
 	n1 = a->cols - n;
-	h2_gemm(_h2_adj, _h2_ntrans, &n1, &x->cols, &n, &f_one, aa + n * lda,
+	h2_gemm(_h2_adj, _h2_ntrans, &n1, &x_cols, &n, &f_one, aa + n * lda,
 		&lda, xa, &ldx, &f_one, xa + n, &ldx);
       }
 
       /* Top part, lower triangular */
       h2_trmm(_h2_left, _h2_upper, _h2_adj, (aunit ? _h2_unit : _h2_nonunit),
-	      &n, &x->cols, &f_one, aa, &lda, xa, &ldx);
+	      &n, &x_cols, &f_one, aa, &lda, xa, &ldx);
     }
     else {
       /* Left upper part, upper triangular */
       h2_trmm(_h2_left, _h2_upper, _h2_ntrans,
-	      (aunit ? _h2_unit : _h2_nonunit), &n, &x->cols, &f_one, aa,
+	      (aunit ? _h2_unit : _h2_nonunit), &n, &x_cols, &f_one, aa,
 	      &lda, xa, &ldx);
 
       /* Right part */
       if (n < a->cols) {
 	n1 = a->cols - n;
-	h2_gemm(_h2_ntrans, _h2_ntrans, &n, &x->cols, &n1, &f_one,
+	h2_gemm(_h2_ntrans, _h2_ntrans, &n, &x_cols, &n1, &f_one,
 		aa + n * lda, &lda, xa + n, &ldx, &f_one, xa, &ldx);
       }
 
@@ -1265,12 +1277,12 @@ triangularaddmul_amatrix(field alpha, bool alower, bool atrans,
 			 pamatrix c)
 {
   pcfield   aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT lda = a->ld;
   pcfield   ba = b->a;
-  uint      ldb = b->ld;
+  LAPACK_INT ldb = b->ld;
   pfield    ca = c->a;
-  uint      ldc = c->ld;
-  uint      aoff, adim, ainc, boff, bdim, binc;
+  LAPACK_INT ldc = c->ld;
+  LAPACK_INT aoff, adim, ainc, boff, bdim, binc;
   uint      j;
   //#ifndef USE_BLAS
   uint      i, k;
@@ -1543,10 +1555,10 @@ uint
 lrdecomp_amatrix(pamatrix a)
 {
   field    *aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT      lda = a->ld;
   uint      n = a->rows;
   field     alpha;
-  uint      i, n1;
+  LAPACK_INT  i, n1;
 
   assert(n == a->cols);
 
@@ -1557,8 +1569,8 @@ lrdecomp_amatrix(pamatrix a)
     alpha = 1.0 / aa[i + i * lda];
 
     n1 = n - i - 1;
-    h2_scal(&n1, &alpha, aa + (i + 1) + i * lda, &u_one);
-    h2_geru(&n1, &n1, &f_minusone, aa + (i + 1) + i * lda, &u_one,
+    h2_scal(&n1, &alpha, aa + (i + 1) + i * lda, &l_one);
+    h2_geru(&n1, &n1, &f_minusone, aa + (i + 1) + i * lda, &l_one,
 	    aa + i + (i + 1) * lda, &lda, aa + (i + 1) + (i + 1) * lda, &lda);
   }
 
@@ -1622,10 +1634,10 @@ uint
 choldecomp_amatrix(pamatrix a)
 {
   field    *aa = a->a;
-  uint      lda = a->ld;
-  uint      n = a->rows;
+  LAPACK_INT lda = a->ld;
+  LAPACK_INT n = a->rows;
 
-  int       info;
+  LAPACK_INT info;
 
   assert(n == a->cols);
 
@@ -1696,10 +1708,10 @@ uint
 ldltdecomp_amatrix(pamatrix a)
 {
   field    *aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT lda = a->ld;
   uint      n = a->rows;
   real      diag, alpha;
-  uint      i, n1;
+  LAPACK_INT i, n1;
 
   assert(n == a->cols);
 
@@ -1711,10 +1723,10 @@ ldltdecomp_amatrix(pamatrix a)
 
     alpha = 1.0 / diag;
     n1 = n - i - 1;
-    h2_rscal(&n1, &alpha, aa + (i + 1) + i * lda, &u_one);
+    h2_rscal(&n1, &alpha, aa + (i + 1) + i * lda, &l_one);
 
     alpha = -diag;
-    h2_syr(_h2_lower, &n1, &alpha, aa + (i + 1) + i * lda, &u_one,
+    h2_syr(_h2_lower, &n1, &alpha, aa + (i + 1) + i * lda, &l_one,
 	   aa + (i + 1) + (i + 1) * lda, &lda);
   }
 
@@ -1785,11 +1797,11 @@ ldltsolve_amatrix(pcamatrix a, pamatrix x)
 void
 qrdecomp_amatrix(pamatrix a, pavector tau)
 {
-  uint      rows = a->rows;
-  uint      cols = a->cols;
-  uint      refl = UINT_MIN(rows, cols);
+  LAPACK_INT rows = a->rows;
+  LAPACK_INT cols = a->cols;
+  LAPACK_INT refl = UINT_MIN(rows, cols);
   field    *work;
-  int       lwork, info;
+  LAPACK_INT lwork, info, a_ld = a->ld;
 
   assert(a->ld >= rows);
   /* Quick exit if no reflections used */
@@ -1802,7 +1814,7 @@ qrdecomp_amatrix(pamatrix a, pavector tau)
   if (tau->dim < refl)
     resize_avector(tau, refl);
 
-  h2_geqrf(&rows, &cols, a->a, &a->ld, tau->v, work, &lwork, &info);
+  h2_geqrf(&rows, &cols, a->a, &a_ld, tau->v, work, &lwork, &info);
   assert(info == 0);
 
   freemem(work);
@@ -1875,14 +1887,14 @@ uint
 qrdecomp_pivot_amatrix(pamatrix a, pavector tau, uint * colpiv)
 {
   pfield    aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT lda = a->ld;
   pfield    tauv;
-  uint      rows = a->rows;
-  uint      cols = a->cols;
-  uint      refl = UINT_MIN(rows, cols);
+  LAPACK_INT      rows = a->rows;
+  LAPACK_INT      cols = a->cols;
+  LAPACK_INT      refl = UINT_MIN(rows, cols);
   field     alpha, beta, gamma, diag;
   real      norm2, norm, maxnorm2;
-  uint      j, k, jmax, n1;
+  LAPACK_INT  j, k, jmax, n1;
 
   /* Provide enough storage for scaling factors */
   if (tau->dim < refl)
@@ -1898,13 +1910,13 @@ qrdecomp_pivot_amatrix(pamatrix a, pavector tau, uint * colpiv)
   for (k = 0; k < refl; k++) {
     /* Compute norm of k-th column */
     n1 = rows - k;
-    norm2 = REAL_SQR(h2_nrm2(&n1, aa + k + k * lda, &u_one));
+    norm2 = REAL_SQR(h2_nrm2(&n1, aa + k + k * lda, &l_one));
     maxnorm2 = norm2;
     jmax = k;
 
     /* Find maximal norm */
     for (j = k + 1; j < cols; j++) {
-      norm2 = REAL_SQR(h2_nrm2(&n1, aa + k + j * lda, &u_one));
+      norm2 = REAL_SQR(h2_nrm2(&n1, aa + k + j * lda, &l_one));
       if (norm2 > maxnorm2) {
 	maxnorm2 = norm2;
 	jmax = j;
@@ -1913,7 +1925,7 @@ qrdecomp_pivot_amatrix(pamatrix a, pavector tau, uint * colpiv)
 
     /* Swap columns */
     if (jmax != k) {
-      h2_swap(&rows, aa + k * lda, &u_one, aa + jmax * lda, &u_one);
+      h2_swap(&rows, aa + k * lda, &l_one, aa + jmax * lda, &l_one);
 
       if (colpiv) {
 	j = colpiv[k];
@@ -1944,7 +1956,7 @@ qrdecomp_pivot_amatrix(pamatrix a, pavector tau, uint * colpiv)
       beta *= ABSSQR(diag - alpha);
       gamma = 1.0 / (diag - alpha);
       n1 = rows - k - 1;
-      h2_scal(&n1, &gamma, aa + k + 1 + k * lda, &u_one);
+      h2_scal(&n1, &gamma, aa + k + 1 + k * lda, &l_one);
       tauv[k] = beta;
 
       /* Compute k-th column */
@@ -1954,14 +1966,14 @@ qrdecomp_pivot_amatrix(pamatrix a, pavector tau, uint * colpiv)
       for (j = k + 1; j < cols; j++) {
 	n1 = rows - k - 1;
 	gamma = aa[k + j * lda]
-	  + h2_dot(&n1, aa + k + 1 + k * lda, &u_one, aa + k + 1 + j * lda,
-		   &u_one);
+	  + h2_dot(&n1, aa + k + 1 + k * lda, &l_one, aa + k + 1 + j * lda,
+		   &l_one);
 
 	gamma *= -beta;
 
 	aa[k + j * lda] += gamma;
-	h2_axpy(&n1, &gamma, aa + k + 1 + k * lda, &u_one,
-		aa + k + 1 + j * lda, &u_one);
+	h2_axpy(&n1, &gamma, aa + k + 1 + k * lda, &l_one,
+		aa + k + 1 + j * lda, &l_one);
       }
     }
   }
@@ -1974,14 +1986,14 @@ qrdecomp_rank_amatrix(pamatrix a, pavector tau, pctruncmode tm, real eps,
 		      uint * colpiv)
 {
   pfield    aa = a->a;
-  uint      lda = a->ld;
+  LAPACK_INT      lda = a->ld;
   pfield    tauv;
-  uint      rows = a->rows;
-  uint      cols = a->cols;
+  LAPACK_INT      rows = a->rows;
+  LAPACK_INT      cols = a->cols;
   uint      refl = UINT_MIN(rows, cols);
   field     alpha, beta, gamma, diag;
   real      norm2, norm, maxnorm2, frobnorm2, firstnorm2;
-  uint      j, k, jmax, n1;
+  LAPACK_INT j, k, jmax, n1;
 
   /* Provide enough storage for scaling factors */
   if (tau->dim < refl)
@@ -2000,14 +2012,14 @@ qrdecomp_rank_amatrix(pamatrix a, pavector tau, pctruncmode tm, real eps,
   for (k = 0; k < refl; k++) {
     /* Compute norm of k-th column */
     n1 = rows - k;
-    norm2 = REAL_SQR(h2_nrm2(&n1, aa + k + k * lda, &u_one));
+    norm2 = REAL_SQR(h2_nrm2(&n1, aa + k + k * lda, &l_one));
     maxnorm2 = norm2;
     frobnorm2 = norm2;
     jmax = k;
 
     /* Find maximal norm */
     for (j = k + 1; j < cols; j++) {
-      norm2 = REAL_SQR(h2_nrm2(&n1, aa + k + j * lda, &u_one));
+      norm2 = REAL_SQR(h2_nrm2(&n1, aa + k + j * lda, &l_one));
       if (norm2 > maxnorm2) {
 	maxnorm2 = norm2;
 	jmax = j;
@@ -2017,7 +2029,7 @@ qrdecomp_rank_amatrix(pamatrix a, pavector tau, pctruncmode tm, real eps,
 
     /* Swap columns */
     if (jmax != k) {
-      h2_swap(&rows, aa + k * lda, &u_one, aa + jmax * lda, &u_one);
+      h2_swap(&rows, aa + k * lda, &l_one, aa + jmax * lda, &l_one);
 
       if (colpiv) {
 	j = colpiv[k];
@@ -2060,7 +2072,7 @@ qrdecomp_rank_amatrix(pamatrix a, pavector tau, pctruncmode tm, real eps,
       beta *= ABSSQR(diag - alpha);
       gamma = 1.0 / (diag - alpha);
       n1 = rows - k - 1;
-      h2_scal(&n1, &gamma, aa + k + 1 + k * lda, &u_one);
+      h2_scal(&n1, &gamma, aa + k + 1 + k * lda, &l_one);
       tauv[k] = beta;
 
       /* Compute k-th column */
@@ -2070,14 +2082,14 @@ qrdecomp_rank_amatrix(pamatrix a, pavector tau, pctruncmode tm, real eps,
       for (j = k + 1; j < cols; j++) {
 	n1 = rows - k - 1;
 	gamma = aa[k + j * lda]
-	  + h2_dot(&n1, aa + k + 1 + k * lda, &u_one, aa + k + 1 + j * lda,
-		   &u_one);
+	  + h2_dot(&n1, aa + k + 1 + k * lda, &l_one, aa + k + 1 + j * lda,
+		   &l_one);
 
 	gamma *= -beta;
 
 	aa[k + j * lda] += gamma;
-	h2_axpy(&n1, &gamma, aa + k + 1 + k * lda, &u_one,
-		aa + k + 1 + j * lda, &u_one);
+	h2_axpy(&n1, &gamma, aa + k + 1 + k * lda, &l_one,
+		aa + k + 1 + j * lda, &l_one);
       }
     }
   }
@@ -2325,11 +2337,12 @@ qrdecomp_rank_amatrix(pamatrix a, pavector tau, pctruncmode tm, real eps,
 void
 qreval_amatrix_avector(bool qtrans, pcamatrix a, pcavector tau, pavector x)
 {
-  uint      rows = a->rows;
-  uint      cols = a->cols;
-  uint      refl;
+  LAPACK_INT      rows = a->rows;
+  LAPACK_INT      cols = a->cols;
+  LAPACK_INT      refl;
   field     work[4];
-  int       lwork, info;
+  LAPACK_INT lwork, info;
+  LAPACK_INT x_dim = x->dim, a_ld = a->ld;
 
   refl = UINT_MIN3(rows, cols, tau->dim);
 
@@ -2342,14 +2355,14 @@ qreval_amatrix_avector(bool qtrans, pcamatrix a, pcavector tau, pavector x)
 
   if (qtrans) {
     h2_ormqr(_h2_left, _h2_adj,
-	     &rows, &u_one, &refl,
-	     a->a, &a->ld, tau->v, x->v, &x->dim, work, &lwork, &info);
+	     &rows, &l_one, &refl,
+	     a->a, &a_ld, tau->v, x->v, &x_dim, work, &lwork, &info);
     assert(info == 0);
   }
   else {
     h2_ormqr(_h2_left, _h2_ntrans,
-	     &rows, &u_one, &refl,
-	     a->a, &a->ld, tau->v, x->v, &x->dim, work, &lwork, &info);
+	     &rows, &l_one, &refl,
+	     a->a, &a_ld, tau->v, x->v, &x_dim, work, &lwork, &info);
     assert(info == 0);
   }
 }
@@ -2357,11 +2370,12 @@ qreval_amatrix_avector(bool qtrans, pcamatrix a, pcavector tau, pavector x)
 void
 qreval_amatrix(bool qtrans, pcamatrix a, pcavector tau, pamatrix x)
 {
-  uint      rows = a->rows;
-  uint      cols = a->cols;
-  uint      refl;
+  LAPACK_INT      rows = a->rows;
+  LAPACK_INT      cols = a->cols;
+  LAPACK_INT      refl;
   pfield    work;
-  int       lwork, info;
+  LAPACK_INT       lwork, info;
+  LAPACK_INT x_cols = x->cols, a_ld = a->ld, x_ld = x->ld;
 
   refl = UINT_MIN3(rows, cols, tau->dim);
 
@@ -2375,14 +2389,14 @@ qreval_amatrix(bool qtrans, pcamatrix a, pcavector tau, pamatrix x)
 
   if (qtrans) {
     h2_ormqr(_h2_left, _h2_adj,
-	     &rows, &x->cols, &refl,
-	     a->a, &a->ld, tau->v, x->a, &x->ld, work, &lwork, &info);
+	     &rows, &x_cols, &refl,
+	     a->a, &a_ld, tau->v, x->a, &x_ld, work, &lwork, &info);
     assert(info == 0);
   }
   else {
     h2_ormqr(_h2_left, _h2_ntrans,
-	     &rows, &x->cols, &refl,
-	     a->a, &a->ld, tau->v, x->a, &x->ld, work, &lwork, &info);
+	     &rows, &x_cols, &refl,
+	     a->a, &a_ld, tau->v, x->a, &x_ld, work, &lwork, &info);
     assert(info == 0);
   }
 
@@ -2397,9 +2411,9 @@ qreval_amatrix_avector(bool qtrans, pcamatrix a, pcavector tau, pavector x)
   uint      lda = a->ld;
   pcfield   tauv = tau->v;
   pfield    xv = x->v;
-  uint      rows = a->rows;
-  uint      cols = a->cols;
-  uint      refl, rows1;
+  LAPACK_INT rows = a->rows;
+  LAPACK_INT cols = a->cols;
+  LAPACK_INT refl, rows1;
   field     beta, gamma;
   uint      k;
 
@@ -2413,7 +2427,7 @@ qreval_amatrix_avector(bool qtrans, pcamatrix a, pcavector tau, pavector x)
       beta = CONJ(tauv[k]);
       gamma = aa[k + k * lda];
       aa[k + k * lda] = 1.0;
-      h2_larf(_h2_left, &rows1, &u_one, aa + k + k * lda, &u_one, &beta,
+      h2_larf(_h2_left, &rows1, &l_one, aa + k + k * lda, &l_one, &beta,
 	      xv + k, &rows, work);
       aa[k + k * lda] = gamma;
     }
@@ -2424,7 +2438,7 @@ qreval_amatrix_avector(bool qtrans, pcamatrix a, pcavector tau, pavector x)
       beta = tauv[k];
       gamma = aa[k + k * lda];
       aa[k + k * lda] = 1.0;
-      h2_larf(_h2_left, &rows1, &u_one, aa + k + k * lda, &u_one, &beta,
+      h2_larf(_h2_left, &rows1, &l_one, aa + k + k * lda, &l_one, &beta,
 	      xv + k, &rows, work);
       aa[k + k * lda] = gamma;
     }
@@ -2439,12 +2453,13 @@ qreval_amatrix(bool qtrans, pcamatrix a, pcavector tau, pamatrix x)
   uint      lda = a->ld;
   pcfield   tauv = tau->v;
   pfield    xa = x->a;
-  uint      ldx = x->ld;
-  uint      rows = a->rows;
-  uint      cols = a->cols;
-  uint      refl, rows1;
+  LAPACK_INT ldx = x->ld;
+  LAPACK_INT rows = a->rows;
+  LAPACK_INT cols = a->cols;
+  LAPACK_INT  refl, rows1;
   field     beta, gamma;
   uint      k;
+  LAPACK_INT x_ld = x->ld, x_cols = x->cols;
 
   refl = UINT_MIN3(rows, cols, tau->dim);
 
@@ -2458,7 +2473,7 @@ qreval_amatrix(bool qtrans, pcamatrix a, pcavector tau, pamatrix x)
       beta = CONJ(tauv[k]);
       gamma = aa[k + k * lda];
       aa[k + k * lda] = 1.0;
-      h2_larf(_h2_left, &rows1, &x->cols, aa + k + k * lda, &u_one, &beta,
+      h2_larf(_h2_left, &rows1, &x_cols, aa + k + k * lda, &l_one, &beta,
 	      xa + k, &ldx, work);
       aa[k + k * lda] = gamma;
     }
@@ -2469,7 +2484,7 @@ qreval_amatrix(bool qtrans, pcamatrix a, pcavector tau, pamatrix x)
       beta = tauv[k];
       gamma = aa[k + k * lda];
       aa[k + k * lda] = 1.0;
-      h2_larf(_h2_left, &rows1, &x->cols, aa + k + k * lda, &u_one, &beta,
+      h2_larf(_h2_left, &rows1, &x_cols, aa + k + k * lda, &l_one, &beta,
 	      xa + k, &ldx, work);
       aa[k + k * lda] = gamma;
     }
@@ -2632,7 +2647,8 @@ void
 qrexpand_amatrix(pcamatrix a, pcavector tau, pamatrix q)
 {
   field    *work;
-  uint      refl, lwork, info;
+  LAPACK_INT      refl, lwork, info;
+  LAPACK_INT      q_cols = q->cols, q_rows = q->rows, q_ld = q->ld;
 
   refl = UINT_MIN(UINT_MIN(q->cols, tau->dim), UINT_MIN(a->rows, a->cols));
 
@@ -2647,7 +2663,7 @@ qrexpand_amatrix(pcamatrix a, pcavector tau, pamatrix q)
   lwork = 4 * a->rows;
   work = allocfield(lwork);
 
-  h2_orgqr(&q->rows, &q->cols, &refl, q->a, &q->ld, tau->v, work, &lwork,
+  h2_orgqr(&q_rows, &q_cols, &refl, q->a, &q_ld, tau->v, work, &lwork,
 	   &info);
   assert(info == 0);
 
