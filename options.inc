@@ -11,7 +11,7 @@
 #OPT=1
 
 # Use complex numbers
-USE_COMPLEX=1
+# USE_COMPLEX=1
 
 # Use BLAS/LAPACK for linear algebra
 USE_BLAS=0

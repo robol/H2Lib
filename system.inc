@@ -7,7 +7,7 @@ RM = rm
 CC = gcc
 GCC = gcc
 
-CFLAGS = -Wall -fPIC -g -O0
+CFLAGS = -Wall -fPIC -g
 LDFLAGS = -Wl,-L,.,-R,.
 LIBS =
 

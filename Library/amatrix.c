@@ -16,6 +16,25 @@
 
 static uint active_amatrix = 0;
 
+field
+trace_amatrix(pamatrix a)
+{
+  LAPACK_INT      rows = a->rows;
+  LAPACK_INT lda = a->ld;
+
+  field trace = 0.0;  
+  uint      j;
+
+
+  for (j = 0; j < rows; j++) {
+    trace+=a->a[j + j * lda];
+
+  }
+
+return trace;
+
+}
+
 /* ------------------------------------------------------------
  * Constructors and destructors
  * ------------------------------------------------------------ */
@@ -92,7 +111,7 @@ init_pointer_amatrix(pamatrix a, pfield src, uint rows, uint cols)
   a->a = src;
   a->rows = rows;
   a->ld = rows;
-  a->cols = rows;
+  a->cols = cols;
   a->owner = src;
 
 #ifdef USE_OPENMP
